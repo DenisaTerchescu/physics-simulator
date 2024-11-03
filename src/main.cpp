@@ -14,16 +14,26 @@ int main(void)
 
 	PhysicsEngine engine;
 
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < 0; i++)
 	{
 
-		engine.addSphere({ rand()%15-7, rand()%10 + 5, rand() % 15 - 7},
-			(rand()%3 + 1)/3.f);
+		//engine.addSphere({ rand()%15-7, rand()%10 + 5, rand() % 15 - 7},
+		//	(rand()%3 + 1)/3.f);
+		//
+		engine.addCube({ rand() % 15 - 7, rand() % 10 + 5, rand() % 15 - 7 },
+			{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1)});
+
+		engine.addCylindre({ rand() % 15 - 7, rand() % 10 + 5, rand() % 15 - 7 },
+			(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
 
 	}
 
-	//engine.addCube({ 0, 10, 0 }, { 2,2,2 });
-	//engine.addSphere({ 3, 20, 2 }, 1);
+	engine.addCube({ 2, 2, 1 }, { 2,2,2 });
+	engine.addCylindre({ 3, 10, 2 }, 2, 3);
+	engine.addCube({ 4, 16, 3 }, { 2,2,2 });
+
+	//engine.addSphere({ 1, 2, 0 }, 1);
+	//engine.addSphere({ 0, 4, 0 }, 1);
 	//engine.addSphere({ 3, 30, 4 }, 1);
 	//engine.addSphere({ 5, 20, 6 }, 1);
 	//engine.addSphere({ 7, 20, 8 }, 1);
@@ -121,6 +131,12 @@ int main(void)
 			{
 				if (o.type == 0) 
 				{
+
+				DrawCubeWires(
+						{ o.pos.x, o.pos.y, o.pos.z },
+						o.size.x, o.size.y, o.size.z,
+						{ 0,155,155,255 });
+
 				DrawCube(  
 					{o.pos.x, o.pos.y, o.pos.z},
 					o.size.x,o.size.y,o.size.z ,
@@ -134,6 +150,19 @@ int main(void)
 
 					DrawSphere({ o.pos.x, o.pos.y, o.pos.z }, o.size.x / 2.f,
 						{ 255,155,100,255 });
+
+				}
+				else if (o.type == 2)
+				{
+
+					DrawCylinderWires({ o.pos.x, o.pos.y - o.size.y/2.f, o.pos.z },
+						o.size.x / 2.f, o.size.x / 2.f, o.size.y, 10,
+						{ 20,10,20,255 });
+
+					DrawCylinder({ o.pos.x, o.pos.y - o.size.y / 2.f, o.pos.z },
+						o.size.x / 2.f, o.size.x / 2.f, o.size.y, 10,
+						{ 250,100,250,255 });
+
 
 				}
 

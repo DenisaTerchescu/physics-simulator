@@ -13,18 +13,12 @@ struct Object
 	
 	glm::vec3 getMin() 
 	{
-		if (type == 0 || type == 1)
-		{
-			return pos - size / 2.f;
-		}
+		return pos - size / 2.f;
 	}
 
 	glm::vec3 getMax()
 	{
-		if (type == 0 || type == 1)
-		{
-			return pos + size / 2.f;
-		}
+		return pos + size / 2.f;
 	}
 };
 
@@ -35,6 +29,9 @@ struct PhysicsEngine
 
 	void addCube(glm::vec3 pos, glm::vec3 size);
 	void addSphere(glm::vec3 pos, float r);
+
+	void addCylindre(glm::vec3 pos, float r, float h);
+
 
 	void update(float deltaTime);
 
