@@ -1,2 +1,2 @@
-# physics-simulator
-physics-simulator
+# The sims
+Tiny physics-simulator using raylib library 
