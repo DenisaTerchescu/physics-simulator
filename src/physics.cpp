@@ -96,15 +96,19 @@ void PhysicsSimulator::update(float deltaTime)
 				float halfHeight2 = b.size.y / 2;
 				float halfDepth2 = b.size.z / 2;
 
+				// vectorul dat de centrele celor 2 cuburi
 				glm::vec3 normal = b.pos - a.pos;
 
+				// cat se intersecteaza pe axa X
 				float overlapX = halfWidth1 + halfWidth2 - abs(normal.x);
 
 				if (overlapX <= 0) continue; 
 
+				// cat se intersecteaza pe axa Y
 				float overlapY = halfHeight1 + halfHeight2 - abs(normal.y);
 				if (overlapY <= 0) continue; 
 
+				// cat se intersecteaza pe axa Z
 				float overlapZ = halfDepth1 + halfDepth2 - abs(normal.z);
 
 				if (overlapZ <= 0) continue; 
