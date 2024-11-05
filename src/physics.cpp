@@ -2,7 +2,7 @@
 
 
 
-void PhysicsEngine::addCube(glm::vec3 pos, glm::vec3 size)
+void PhysicsSimulator::addCube(glm::vec3 pos, glm::vec3 size)
 {
 	Object o;
 
@@ -12,29 +12,29 @@ void PhysicsEngine::addCube(glm::vec3 pos, glm::vec3 size)
 	objects.push_back(o);
 }
 
-void PhysicsEngine::addSphere(glm::vec3 pos, float r)
+void PhysicsSimulator::addSphere(glm::vec3 pos, float r)
 {
 	Object o;
 
-	o.type = 1;
+	o.type = SPHERE;
 	o.pos = pos;
 	o.size = {r*2, r*2, r*2};
 
 	objects.push_back(o);
 }
 
-void PhysicsEngine::addCylindre(glm::vec3 pos, float r, float h)
+void PhysicsSimulator::addCylindre(glm::vec3 pos, float r, float h)
 {
 	Object o;
 
-	o.type = 2;
+	o.type = CYLINDER;
 	o.pos = pos;
 	o.size = { r * 2, h, r * 2 };
 
 	objects.push_back(o);
 }
 
-void PhysicsEngine::update(float deltaTime)
+void PhysicsSimulator::update(float deltaTime)
 {
 
 	for (int i = 0; i < objects.size(); i++)
@@ -62,7 +62,7 @@ void PhysicsEngine::update(float deltaTime)
 			}
 
 			//sphere vs sphere
-			if (a.type == 1 && b.type == 1)
+			if (a.type == SPHERE && b.type == SPHERE)
 			{
 				float aR = a.size.x / 2;
 				float bR = b.size.x / 2;
@@ -86,7 +86,7 @@ void PhysicsEngine::update(float deltaTime)
 				}
 
 			}
-			else if (a.type == 0 && b.type == 0)
+			else if (a.type == CUBE && b.type == CUBE)
 			{
 				float aHalfWidth = a.size.x / 2;
 				float aHalfHeight = a.size.y / 2;
@@ -137,7 +137,7 @@ void PhysicsEngine::update(float deltaTime)
 				b.velocity = glm::reflect(b.velocity, -collisionNormal);
 
 			}
-			else if (a.type == 0 && b.type == 1)
+			else if (a.type == CUBE && b.type == SPHERE)
 			{
 				//b is sphere
 				float bR = b.size.x / 2;
@@ -176,7 +176,7 @@ void PhysicsEngine::update(float deltaTime)
 			}
 
 			//cylinder
-			else if (a.type == 2 && b.type == 2)
+			else if (a.type == CYLINDER && b.type == CYLINDER)
 			{
 				float aRadius = a.size.x / 2;  // Assuming size.x is the diameter of the cylinder
 				float bRadius = b.size.x / 2;
@@ -224,7 +224,7 @@ void PhysicsEngine::update(float deltaTime)
 			}
 
 			//cylinder sphere
-			else if (a.type == 2 && b.type == 1)
+			else if (a.type == CYLINDER && b.type == SPHERE)
 			{
 				float cylinderRadius = a.size.x / 2;  // Assuming size.x is the diameter of the cylinder
 				float cylinderHalfHeight = a.size.y / 2; // Assuming size.y is the total height of the cylinder
@@ -293,7 +293,7 @@ void PhysicsEngine::update(float deltaTime)
 			}
 
 			//cylinder cube
-			else if (a.type == 2 && b.type == 0) 
+			else if (a.type == CYLINDER && b.type == CUBE) 
 			{
 				float cylinderRadius = a.size.x / 2;          // Assuming size.x is the diameter of the cylinder
 				float cylinderHalfHeight = a.size.y / 2;      // Assuming size.y is the total height of the cylinder
@@ -360,7 +360,7 @@ void PhysicsEngine::update(float deltaTime)
 			}
 		}
 
-		//hit walls
+		// the collisions with the glass container
 		{
 
 			auto minPos = a.getMin();

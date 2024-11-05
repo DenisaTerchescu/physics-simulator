@@ -12,7 +12,7 @@
 int main(void)
 {
 
-	PhysicsEngine engine;
+	PhysicsSimulator engine;
 
 	for (int i = 0; i < 0; i++)
 	{
@@ -40,7 +40,7 @@ int main(void)
 	//engine.addSphere({ 9, 20, 10 }, 1);
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-	InitWindow(800, 600, "Physics simulator");
+	InitWindow(800, 600, "The Sims | Physics simulator");
 
 #pragma region imgui
 	rlImGuiSetup(true);
@@ -108,6 +108,18 @@ int main(void)
 
 		ImGui::End();
 		*/
+
+		// Draw the panel on the right side of the window - 500
+		DrawRectangle(GetScreenWidth() - 370, 10, 500, 250, PINK);
+
+		// Draw some text inside the panel
+		DrawText("PRESS 1 - 100 Spheres, 250 Cubes,", GetScreenWidth() - 370 + 10, 12, 20, WHITE);
+		DrawText("500 Cylinders ", GetScreenWidth() - 370 + 10, 42, 20, WHITE);
+		DrawText("PRESS 2 - 250 Spheres, 500 Cubes, ", GetScreenWidth() - 370 + 10, 92, 20, WHITE);
+		DrawText("1000 Cylinders ", GetScreenWidth() - 370 + 10, 112, 20, WHITE);
+		DrawText("PRESS 3 - 500 Spheres, 1000 Cubes, ", GetScreenWidth() - 370 + 10, 162, 20, WHITE);
+		DrawText("2500 Cylinders ", GetScreenWidth() - 370 + 10, 192, 20, WHITE);
+
 
 		if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
 		{
@@ -179,6 +191,8 @@ int main(void)
 
 
 		EndMode3D();
+
+
 
 	
 
