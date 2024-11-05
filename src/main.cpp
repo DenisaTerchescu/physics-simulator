@@ -33,12 +33,20 @@ int main(void)
 	
 
 
-	engine.addSphere({ 1, 2, 0 }, 1);
-	engine.addSphere({ 0, 4, 0 }, 1);
-	engine.addSphere({ 3, 25, 4 }, 1);
-	engine.addSphere({ 5, 22, 6 }, 1);
-	engine.addSphere({ 29, 45, 8 }, 1);
-	engine.addSphere({ 9, 20, 10 }, 1);
+	//engine.addSphere({ 1, 2, 0 }, 1);
+	//engine.addSphere({ 0, 4, 0 }, 1);
+	//engine.addSphere({ 3, 25, 4 }, 1);
+	//engine.addSphere({ 5, 22, 6 }, 1);
+	//engine.addSphere({ 29, 45, 8 }, 1);
+	//engine.addSphere({ 9, 20, 10 }, 1);
+
+	engine.addCube({ 1, 2, 0 }, {2,2,2});
+	engine.addCube({ 0, 4, 0 }, { 2,2,2 });
+	engine.addCube({ 3, 25, 4 }, { 2,2,2 });
+	engine.addCube({ 5, 22, 6 }, { 2,2,2 });
+	engine.addCube({ 29, 45, 8 }, { 2,2,2 });
+	engine.addCube({ 9, 20, 10 }, { 2,2,2 });
+
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(800, 600, "The Sims | Physics simulator");

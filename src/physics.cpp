@@ -41,7 +41,7 @@ void PhysicsSimulator::update(float deltaTime)
 	{
 		Object& a = objects[i];
 
-		a.gravity = glm::vec3(0, -9.81, 0);
+		a.gravity = glm::vec3(-9.81, -9.81, 0);
 
 		{
 			a.velocity += deltaTime * a.gravity;
@@ -60,25 +60,26 @@ void PhysicsSimulator::update(float deltaTime)
 				continue;
 			}
 
-			//sphere vs sphere
 			if (a.type == SPHERE && b.type == SPHERE)
 			{
-				float aR = a.size.x / 2;
-				float bR = b.size.x / 2;
+				// razele celor 2 sfere
+				float r1 = a.size.x / 2;
+				float r2 = b.size.x / 2;
 
+				// vectorul dat de centrele sferelor
 				glm::vec3 normal = b.pos - a.pos;
 
-				float distantaSquared = glm::dot(normal, normal);
+				// distanta dintre cele 2 centre
+				float distance = glm::length(normal);
 
-				if (distantaSquared < (aR + bR) * (aR + bR))
+				if (distance < abs(r1 + r2))
 				{
 					normal = glm::normalize(normal);
 
-					float distanta = sqrt(distantaSquared);
-					float penetration = (aR + bR) - distanta;
+					float interlappedSection = (r1 + r2) - distance;
 
-					a.pos -= normal * penetration / 2.f;
-					b.pos += normal * penetration / 2.f;
+					a.pos -= normal * interlappedSection / 2.f;
+					b.pos += normal * interlappedSection / 2.f;
 
 					a.velocity = glm::reflect(a.velocity, normal);
 					b.velocity = glm::reflect(b.velocity, -normal);
@@ -87,58 +88,52 @@ void PhysicsSimulator::update(float deltaTime)
 			}
 			else if (a.type == CUBE && b.type == CUBE)
 			{
-				float aHalfWidth = a.size.x / 2;
-				float aHalfHeight = a.size.y / 2;
-				float aHalfDepth = a.size.z / 2;
+				float halfWidth1 = a.size.x / 2;
+				float halfHeight1 = a.size.y / 2;
+				float halfDepth1 = a.size.z / 2;
 
-				float bHalfWidth = b.size.x / 2;
-				float bHalfHeight = b.size.y / 2;
-				float bHalfDepth = b.size.z / 2;
+				float halfWidth2 = b.size.x / 2;
+				float halfHeight2 = b.size.y / 2;
+				float halfDepth2 = b.size.z / 2;
 
-				// Vector from box A center to box B center
 				glm::vec3 normal = b.pos - a.pos;
 
-				// Calculate overlap on the x-axis
-				float overlapX = aHalfWidth + bHalfWidth - abs(normal.x);
-				if (overlapX <= 0) continue; // No collision on the x-axis
+				float overlapX = halfWidth1 + halfWidth2 - abs(normal.x);
 
-				// Calculate overlap on the y-axis
-				float overlapY = aHalfHeight + bHalfHeight - abs(normal.y);
-				if (overlapY <= 0) continue; // No collision on the y-axis
+				if (overlapX <= 0) continue; 
 
-				// Calculate overlap on the z-axis
-				float overlapZ = aHalfDepth + bHalfDepth - abs(normal.z);
-				if (overlapZ <= 0) continue; // No collision on the z-axis
+				float overlapY = halfHeight1 + halfHeight2 - abs(normal.y);
+				if (overlapY <= 0) continue; 
 
-				// Determine the axis of least penetration
-				float penetration;
-				glm::vec3 collisionNormal;
+				float overlapZ = halfDepth1 + halfDepth2 - abs(normal.z);
 
+				if (overlapZ <= 0) continue; 
+
+				float overlappedSection;
+
+				// determinam axa unde cuburile s-au intersectat cel mai putin
 				if (overlapX < overlapY && overlapX < overlapZ) {
-					penetration = overlapX;
-					collisionNormal = glm::vec3(normal.x < 0 ? -1.0f : 1.0f, 0.0f, 0.0f);
+					overlappedSection = overlapX;
+					normal = glm::normalize(glm::vec3(normal.x, 0, 0));
 				}
 				else if (overlapY < overlapZ) {
-					penetration = overlapY;
-					collisionNormal = glm::vec3(0.0f, normal.y < 0 ? -1.0f : 1.0f, 0.0f);
+					overlappedSection = overlapY;
+					normal = glm::normalize(glm::vec3(0, normal.y, 0));
 				}
 				else {
-					penetration = overlapZ;
-					collisionNormal = glm::vec3(0.0f, 0.0f, normal.z < 0 ? -1.0f : 1.0f);
+					overlappedSection = overlapZ;
+					normal = glm::normalize(glm::vec3(0, 0, normal.z));
 				}
 
-				// Separate the boxes along the collision normal by half the penetration depth
-				a.pos -= collisionNormal * (penetration / 2.0f);
-				b.pos += collisionNormal * (penetration / 2.0f);
+				a.pos -= normal * (overlappedSection / 2.0f);
+				b.pos += normal * (overlappedSection / 2.0f);
 
-				// Reflect the velocities along the collision normal
-				a.velocity = glm::reflect(a.velocity, collisionNormal);
-				b.velocity = glm::reflect(b.velocity, -collisionNormal);
+				a.velocity = glm::reflect(a.velocity, normal);
+				b.velocity = glm::reflect(b.velocity, -normal);
 
 			}
 			else if (a.type == CUBE && b.type == SPHERE)
 			{
-				//b is sphere
 				float bR = b.size.x / 2;
 
 				glm::vec3 corner = b.pos;
