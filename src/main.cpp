@@ -13,7 +13,7 @@ int main(void)
 
 	PhysicsSimulator engine;
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 0; i++)
 	{
 
 		//engine.addSphere({ rand()%15-7, rand()%10 + 5, rand() % 15 - 7},
@@ -27,18 +27,18 @@ int main(void)
 
 	}
 
-		engine.addCube({ 2, 2, 1 }, { 2,2,2 });
-		engine.addCylindre({ 3, 10, 2 }, 2, 3);
-		engine.addCube({ 4, 16, 3 }, { 2,2,2 });
+		//engine.addCube({ 2, 2, 1 }, { 2,2,2 });
+		//engine.addCylindre({ 3, 10, 2 }, 2, 3);
+		//engine.addCube({ 4, 16, 3 }, { 2,2,2 });
 	
 
 
-	//engine.addSphere({ 1, 2, 0 }, 1);
-	//engine.addSphere({ 0, 4, 0 }, 1);
-	//engine.addSphere({ 3, 30, 4 }, 1);
-	//engine.addSphere({ 5, 20, 6 }, 1);
-	//engine.addSphere({ 7, 20, 8 }, 1);
-	//engine.addSphere({ 9, 20, 10 }, 1);
+	engine.addSphere({ 1, 2, 0 }, 1);
+	engine.addSphere({ 0, 4, 0 }, 1);
+	engine.addSphere({ 3, 25, 4 }, 1);
+	engine.addSphere({ 5, 22, 6 }, 1);
+	engine.addSphere({ 29, 45, 8 }, 1);
+	engine.addSphere({ 9, 20, 10 }, 1);
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(800, 600, "The Sims | Physics simulator");

@@ -12,18 +12,11 @@ struct Object
 	glm::vec3 pos = {};
 	glm::vec3 size = {};
 	glm::vec3 velocity = {};
-	glm::vec3 acceleration = {};
+	glm::vec3 gravity = {};
 	particle type = CUBE;
 	
-	glm::vec3 getMin() 
-	{
-		return pos - size / 2.f;
-	}
-
-	glm::vec3 getMax()
-	{
-		return pos + size / 2.f;
-	}
+	glm::vec3 calculateMinimumPoint() { return pos - size / 2.f; }
+	glm::vec3 calculateMaximumPoint() { return pos + size / 2.f; }
 };
 
 struct PhysicsSimulator

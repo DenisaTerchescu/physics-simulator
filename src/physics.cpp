@@ -41,13 +41,12 @@ void PhysicsSimulator::update(float deltaTime)
 	{
 		Object& a = objects[i];
 
-		a.acceleration += glm::vec3(1, -9.81, 1);
+		a.gravity = glm::vec3(0, -9.81, 0);
 
 		{
-			a.velocity += deltaTime * a.acceleration;
+			a.velocity += deltaTime * a.gravity;
 			a.pos += deltaTime * a.velocity;
 
-			a.acceleration = {};
 		}
 
 		for (int j = 0; j < objects.size(); j++)
@@ -144,8 +143,8 @@ void PhysicsSimulator::update(float deltaTime)
 
 				glm::vec3 corner = b.pos;
 
-				auto boxMin = a.getMin();
-				auto boxMax = a.getMax();
+				auto boxMin = a.calculateMinimumPoint();
+				auto boxMax = a.calculateMaximumPoint();
 
 				corner = glm::clamp(corner, boxMin, boxMax);
 
@@ -363,13 +362,13 @@ void PhysicsSimulator::update(float deltaTime)
 		// the collisions with the glass container
 		{
 
-			auto minPos = a.getMin();
-			auto maxPos = a.getMax();
+			auto minPos = a.calculateMinimumPoint();
+			auto maxPos = a.calculateMaximumPoint();
 
 			if (minPos.y < 0) 
 			{
 				a.pos.y += -minPos.y;
-				a.velocity.y *= 0;
+				a.velocity.y *= -0.9f;
 			}
 
 			if (maxPos.y > glassContainer.y)
