@@ -1,7 +1,5 @@
 #include "physics.h"
 
-
-
 void PhysicsSimulator::addCube(glm::vec3 pos, glm::vec3 size)
 {
 	Object o;
@@ -43,8 +41,11 @@ void PhysicsSimulator::update(float deltaTime)
 
 		a.gravity = glm::vec3(0, -9.81, 0);
 
+		// forta de frecare cu aerul
+		float dragCoefficient = 0.9f;
+
 		{
-			a.velocity += deltaTime * a.gravity;
+			a.velocity += deltaTime * a.gravity * dragCoefficient;
 			a.pos += deltaTime * a.velocity;
 
 		}
@@ -138,42 +139,48 @@ void PhysicsSimulator::update(float deltaTime)
 			}
 			else if (a.type == CUBE && b.type == SPHERE)
 			{
-				float bR = b.size.x / 2;
+				float r = b.size.x / 2;
 
-				glm::vec3 corner = b.pos;
+				glm::vec3 centerSphere = b.pos;
 
+				// varfurile minime si maxime ale cubului
 				auto boxMin = a.calculateMinimumPoint();
 				auto boxMax = a.calculateMaximumPoint();
 
-				corner = glm::clamp(corner, boxMin, boxMax);
+				// mutam centrul sferei catre cel mai apropiat punct al cubului
+				centerSphere = glm::clamp(centerSphere, boxMin, boxMax);
 
-				if(corner.x == b.pos.x && 
-					corner.y == b.pos.y &&
-					corner.z == b.pos.z) 
+				// bugfix daca obiectele se suprapun total
+				if (centerSphere.x == b.pos.x && 
+					centerSphere.y == b.pos.y &&
+					centerSphere.z == b.pos.z) 
 				{
-					continue;
+					a.pos -= 10;
+					b.pos += 10;
+
+					a.velocity = glm::reflect(a.velocity, glm::vec3(0,1,0));
+					b.velocity = glm::reflect(b.velocity, -glm::vec3(0, 1, 0));
 				}
 				
-				float distanceSquared = glm::dot(corner - b.pos, corner - b.pos);
+				// distanta dintre centrele celor 2 obiecte
+				float distance = glm::length(centerSphere - b.pos);
 
-				if (distanceSquared < bR * bR)
+				if (distance < r)
 				{
-					glm::vec3 normal = b.pos - corner;
+					glm::vec3 normal = b.pos - centerSphere;
 					normal = glm::normalize(normal);
 
-					float distanta = sqrt(distanceSquared);
-					float penetration = (bR) - distanta;
+					float overlappedSection = r - distance;
 
-					a.pos -= normal * penetration / 2.f;
-					b.pos += normal * penetration / 2.f;
+					a.pos -= normal * overlappedSection / 2.f;
+					b.pos += normal * overlappedSection / 2.f;
 
 					a.velocity = glm::reflect(a.velocity, normal);
 					b.velocity = glm::reflect(b.velocity, -normal);
 				}
 
 			}
-
-			//cylinder
+//////////////////////////////////////////
 			else if (a.type == CYLINDER && b.type == CYLINDER)
 			{
 				float aRadius = a.size.x / 2;  // Assuming size.x is the diameter of the cylinder
@@ -358,7 +365,7 @@ void PhysicsSimulator::update(float deltaTime)
 			}
 		}
 
-		// the collisions with the glass container
+		// coliziunile cu cubul de sticla
 		{
 
 			auto minPos = a.calculateMinimumPoint();
