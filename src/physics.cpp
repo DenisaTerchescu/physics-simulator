@@ -41,7 +41,7 @@ void PhysicsSimulator::update(float deltaTime)
 	{
 		Object& a = objects[i];
 
-		a.acceleration += glm::vec3(2, -9.81, 2);
+		a.acceleration += glm::vec3(1, -9.81, 1);
 
 		{
 			a.velocity += deltaTime * a.acceleration;
@@ -369,7 +369,7 @@ void PhysicsSimulator::update(float deltaTime)
 			if (minPos.y < 0) 
 			{
 				a.pos.y += -minPos.y;
-				a.velocity.y *= 0;
+				a.velocity.y *= -1;
 			}
 
 			if (maxPos.y > glassContainer.y)

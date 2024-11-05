@@ -35,6 +35,7 @@ struct PhysicsSimulator
 	void addSphere(glm::vec3 pos, float r);
 
 	void addCylindre(glm::vec3 pos, float r, float h);
+	void removeAll();
 
 	void update(float deltaTime);
 };

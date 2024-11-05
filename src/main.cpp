@@ -12,17 +12,17 @@ int main(void)
 {
 
 	PhysicsSimulator engine;
-	
-	for (int i = 0; i < 0; i++)
+
+	for (int i = 0; i < 10; i++)
 	{
 
 		//engine.addSphere({ rand()%15-7, rand()%10 + 5, rand() % 15 - 7},
 		//	(rand()%3 + 1)/3.f);
 		//
-		engine.addCube({ rand() % 15 - 7, rand() % 10 + 5, rand() % 15 - 7 },
+		engine.addCube({ rand() % ((int)engine.glassContainer.x -5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7},
 			{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1)});
 
-		engine.addCylindre({ rand() % 15 - 7, rand() % 10 + 5, rand() % 15 - 7 },
+		engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
 			(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
 
 	}
@@ -76,7 +76,7 @@ int main(void)
 	camera.up = Vector3{ 0.0f, 1.0f, 0.0f };          
 	camera.fovy = 45.0f;                                
 	camera.projection = CAMERA_PERSPECTIVE; 
-	int option = 1;
+	int option = 0;
 
 	Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 
@@ -140,6 +140,72 @@ int main(void)
 		if (IsKeyPressed('1')) option = 1;
 		if (IsKeyPressed('2')) option = 2;
 		if (IsKeyPressed('3')) option = 3;
+
+		std::cout << engine.objects.size() << '\n';
+
+		if (option == 1) {
+			engine.glassContainer = { 50,50,50 };
+			engine.objects.clear();
+
+			for (int i = 0; i < 500; i++)
+			{
+				if (i < 100) {
+				engine.addSphere({ rand()% ((int)engine.glassContainer.x - 5) -7, rand()% ((int)engine.glassContainer.y - 10) + 5, 
+					rand() % ((int)engine.glassContainer.z - 5) + 5}, (rand()%3 + 1)/3.f);
+				}
+				if (i < 250) {
+					engine.addCube({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+						{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1) });
+				}
+
+				engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+					(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
+
+			}
+			option = 0;
+		}
+		if (option == 2) {
+			engine.glassContainer = { 100,100,100 };
+			engine.objects.clear();
+
+			for (int i = 0; i < 1000; i++)
+			{
+				if (i < 250) {
+					engine.addSphere({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5,
+						rand() % ((int)engine.glassContainer.z - 5) + 5 }, (rand() % 3 + 1) / 3.f);
+				}
+				if (i < 500) {
+					engine.addCube({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+						{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1) });
+				}
+
+				engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+					(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
+
+			}
+			option = 0;
+		}
+		if (option == 3) {
+			engine.glassContainer = { 300,300,300 };
+			engine.objects.clear();
+
+			for (int i = 0; i < 2500; i++)
+			{
+				if (i < 500) {
+					engine.addSphere({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5,
+						rand() % ((int)engine.glassContainer.z - 5) + 5 }, (rand() % 3 + 1) / 3.f);
+				}
+				if (i < 1000) {
+					engine.addCube({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+						{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1) });
+				}
+
+				engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+					(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
+
+			}
+			option = 0;
+		}
 		//----------------------------------------------------------------------------------
 
 		// Draw
@@ -196,7 +262,7 @@ int main(void)
 
 
 
-		DrawGrid(20, 1.0f);
+		DrawGrid(engine.glassContainer.x, 1.0f);
 
 		DrawCube({0,engine.glassContainer.y/2.f,0}, engine.glassContainer.x,
 			engine.glassContainer.y, engine.glassContainer.z, { 155,100,100,20 });
