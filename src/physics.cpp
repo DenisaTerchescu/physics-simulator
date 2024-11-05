@@ -41,7 +41,7 @@ void PhysicsSimulator::update(float deltaTime)
 	{
 		Object& a = objects[i];
 
-		a.gravity = glm::vec3(-9.81, -9.81, 0);
+		a.gravity = glm::vec3(0, -9.81, 0);
 
 		{
 			a.velocity += deltaTime * a.gravity;
