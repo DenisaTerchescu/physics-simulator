@@ -369,7 +369,7 @@ void PhysicsSimulator::update(float deltaTime)
 			if (minPos.y < 0) 
 			{
 				a.pos.y += -minPos.y;
-				a.velocity.y *= -1;
+				a.velocity.y *= 0;
 			}
 
 			if (maxPos.y > glassContainer.y)

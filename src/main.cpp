@@ -140,9 +140,16 @@ int main(void)
 		if (IsKeyPressed('1')) option = 1;
 		if (IsKeyPressed('2')) option = 2;
 		if (IsKeyPressed('3')) option = 3;
+		if (IsKeyPressed('R')) {
+			for (Object& o : engine.objects) {
+				o.pos = { rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, 
+					 rand() % ((int)engine.glassContainer.z - 5) - 7 };
+			}
+		}
 
 		std::cout << engine.objects.size() << '\n';
 
+		
 		if (option == 1) {
 			engine.glassContainer = { 50,50,50 };
 			engine.objects.clear();
