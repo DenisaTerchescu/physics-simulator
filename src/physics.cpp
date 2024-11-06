@@ -1,4 +1,5 @@
 #include "physics.h"
+#include <iostream>
 
 void PhysicsSimulator::addCube(glm::vec3 pos, glm::vec3 size)
 {
@@ -40,11 +41,12 @@ void PhysicsSimulator::update(float deltaTime)
 		Object& a = objects[i];
 
 		// forta de frecare cu aerul
-		float dragCoefficient = 0.9f;
+		float dragCoefficient = 0.2f;
 
 		{
-			a.velocity += deltaTime * a.gravity * dragCoefficient;
+			a.velocity += deltaTime * a.gravity;
 			a.pos += deltaTime * a.velocity;
+			a.velocity -= a.velocity * deltaTime * dragCoefficient;
 
 		}
 
@@ -84,9 +86,10 @@ void PhysicsSimulator::update(float deltaTime)
 					b.velocity = glm::reflect(b.velocity, -normal);
 				}
 
-			}
+			} 
 			else if (a.type == CUBE && b.type == CUBE)
 			{
+
 				float halfWidth1 = a.size.x / 2;
 				float halfHeight1 = a.size.y / 2;
 				float halfDepth1 = a.size.z / 2;
@@ -99,16 +102,19 @@ void PhysicsSimulator::update(float deltaTime)
 				glm::vec3 normal = b.pos - a.pos;
 
 				// cat se intersecteaza pe axa X
-				float overlapX = halfWidth1 + halfWidth2 - abs(normal.x);
+				float overlapX = abs(halfWidth1) + abs(halfWidth2) - abs(normal.x);
 
 				if (overlapX <= 0) continue; 
 
+				if (normal.x == 0 && normal.y == 0 && normal.z == 0) continue; 
+
 				// cat se intersecteaza pe axa Y
-				float overlapY = halfHeight1 + halfHeight2 - abs(normal.y);
+				float overlapY = abs(halfHeight1) + abs(halfHeight2) - abs(normal.y);
+
 				if (overlapY <= 0) continue; 
 
 				// cat se intersecteaza pe axa Z
-				float overlapZ = halfDepth1 + halfDepth2 - abs(normal.z);
+				float overlapZ = abs(halfDepth1) + abs(halfDepth2) - abs(normal.z);
 
 				if (overlapZ <= 0) continue; 
 
@@ -117,55 +123,59 @@ void PhysicsSimulator::update(float deltaTime)
 				// determinam axa unde cuburile s-au intersectat cel mai putin
 				if (overlapX < overlapY && overlapX < overlapZ) {
 					overlappedSection = overlapX;
-					normal = glm::normalize(glm::vec3(normal.x, 0, 0));
+					//normal = glm::normalize(glm::vec3(normal.x, 0, 0));
+					normal = glm::vec3(normal.x > 0 ? 1 : -1, 0, 0);
 				}
 				else if (overlapY < overlapZ) {
 					overlappedSection = overlapY;
-					normal = glm::normalize(glm::vec3(0, normal.y, 0));
+					//normal = glm::normalize(glm::vec3(0, normal.y, 0));
+					normal = glm::vec3(0, normal.y > 0 ? 1 : -1, 0);
 				}
 				else {
 					overlappedSection = overlapZ;
-					normal = glm::normalize(glm::vec3(0, 0, normal.z));
+					//normal = glm::normalize(glm::vec3(0, 0, normal.z));
+					normal = glm::vec3(0, 0, normal.z > 0 ? 1 : -1);
 				}
 
 				a.pos -= normal * (overlappedSection / 2.0f);
 				b.pos += normal * (overlappedSection / 2.0f);
-
 				a.velocity = glm::reflect(a.velocity, normal);
 				b.velocity = glm::reflect(b.velocity, -normal);
 
-			}
+			} 
 			else if (a.type == CUBE && b.type == SPHERE)
 			{
 				float r = b.size.x / 2;
 
-				glm::vec3 centerSphere = b.pos;
+				glm::vec3 closestCubeCorner = b.pos;
 
 				// varfurile minime si maxime ale cubului
 				auto boxMin = a.calculateMinimumPoint();
 				auto boxMax = a.calculateMaximumPoint();
 
-				// mutam centrul sferei catre cel mai apropiat punct al cubului
-				centerSphere = glm::clamp(centerSphere, boxMin, boxMax);
+				// mutam centrul sferei catre cel mai apropiat varf al cubului
+				closestCubeCorner = glm::clamp(closestCubeCorner, boxMin, boxMax);
 
 				// bugfix daca obiectele se suprapun total
-				if (centerSphere.x == b.pos.x && 
-					centerSphere.y == b.pos.y &&
-					centerSphere.z == b.pos.z) 
+				if (closestCubeCorner.x == b.pos.x && 
+					closestCubeCorner.y == b.pos.y &&
+					closestCubeCorner.z == b.pos.z) 
 				{
-					a.pos -= 10;
-					b.pos += 10;
+					a.pos -= 0.1;
+					b.pos += 0.1;
 
 					a.velocity = glm::reflect(a.velocity, glm::vec3(0,1,0));
 					b.velocity = glm::reflect(b.velocity, -glm::vec3(0, 1, 0));
+
+					continue;
 				}
 				
 				// distanta dintre centrele celor 2 obiecte
-				float distance = glm::length(centerSphere - b.pos);
+				float distance = glm::length(closestCubeCorner - b.pos);
 
 				if (distance < r)
 				{
-					glm::vec3 normal = b.pos - centerSphere;
+					glm::vec3 normal = b.pos - closestCubeCorner;
 					normal = glm::normalize(normal);
 
 					float overlappedSection = r - distance;
@@ -178,7 +188,7 @@ void PhysicsSimulator::update(float deltaTime)
 				}
 
 			}
-
+			
 			else if (a.type == CYLINDER && b.type == CYLINDER)
 			{
 				float r1 = a.size.x / 2;  
@@ -205,11 +215,13 @@ void PhysicsSimulator::update(float deltaTime)
 				// se determina axa unde obiectele intra in coliziune cel mai putin
 				if (verticalOverlap < horizontalOverlap) {
 					overlappedSection = verticalOverlap;
-					normal = glm::normalize(glm::vec3(0.0f, normal.y, 0.0f));
+					//normal = glm::normalize(glm::vec3(0.0f, normal.y, 0.0f));
+					normal = glm::normalize(glm::vec3(0.0f, normal.y > 0 ? 1 : -1, 0.0f));
 				}
 				else {
 					overlappedSection = horizontalOverlap;
-					normal = glm::normalize(glm::vec3(normalXZ.x, 0.0f, normalXZ.y));
+					normal = glm::normalize(glm::vec3(normalXZ.x > 0 ? 1 : -1, 0.0f, normalXZ.y > 0 ? 1 : -1));
+					//normal = glm::normalize(glm::vec3(1, 0.0f, 1));
 				}
 
 				a.pos -= normal * (overlappedSection / 2.0f);
@@ -218,7 +230,7 @@ void PhysicsSimulator::update(float deltaTime)
 				a.velocity = glm::reflect(a.velocity, normal);
 				b.velocity = glm::reflect(b.velocity, -normal);
 			}
-
+			
 			else if (a.type == CYLINDER && b.type == SPHERE)
 			{
 				float cylinderRadius = a.size.x / 2; 
@@ -243,13 +255,13 @@ void PhysicsSimulator::update(float deltaTime)
 				float overlappedSection;
 
 				// se determina axa unde obiectele s-au intersectat cel mai putin
-				if (verticalOverlap > horizontalOverlap) {
+				if (verticalOverlap > horizontalOverlap && (normal.x != 0 || normal.z != 0)) {
 					overlappedSection = horizontalOverlap;
 					if (distXZ > 0) {
-						normal = -glm::normalize(glm::vec3(normal.x, 0.0f, normal.z));
+						normal = -glm::normalize(glm::vec3(normal.x, 0, normal.z));
+						//normal = -glm::normalize(glm::vec3(1, 0.0f, 1));
 					}
 					else {
-						// sfera si cilindrul sunt perfect aliniate pe verticala
 						normal = glm::vec3(1.0f, 0.0f, 0.0f); 
 					}
 				}
@@ -273,72 +285,79 @@ void PhysicsSimulator::update(float deltaTime)
 				a.velocity = glm::reflect(a.velocity, normal);
 
 			}
-
+			
 			else if (a.type == CYLINDER && b.type == CUBE) 
 			{
-				float cylinderRadius = a.size.x / 2;          // Assuming size.x is the diameter of the cylinder
-				float cylinderHalfHeight = a.size.y / 2;      // Assuming size.y is the total height of the cylinder
+				float cylinderRadius = a.size.x / 2;         
+				float cylinderHalfHeight = a.size.y / 2;     
 
-				float cubeHalfWidth = b.size.x / 2;           // Assuming size.x is the width of the cube
-				float cubeHalfHeight = b.size.y / 2;          // Assuming size.y is the height of the cube
-				float cubeHalfDepth = b.size.z / 2;           // Assuming size.z is the depth of the cube
+				float cubeHalfWidth = b.size.x / 2;           
+				float cubeHalfHeight = b.size.y / 2;         
+				float cubeHalfDepth = b.size.z / 2;           
 
-				// Vector from the center of the cylinder to the center of the cube
-				glm::vec3 delta = b.pos - a.pos;
+				glm::vec3 normal = b.pos - a.pos;
 
-				// Check vertical overlap
-				float verticalDistance = std::abs(delta.y);
-				float verticalOverlap = (cylinderHalfHeight + cubeHalfHeight) - verticalDistance;
+				float verticalOverlap = (cylinderHalfHeight + cubeHalfHeight) - std::abs(normal.y);
+				
+				if (verticalOverlap <= 0) { continue; }
 
-				// Check horizontal (x-z plane) distance
-				float closestX = glm::clamp(delta.x, -cubeHalfWidth, cubeHalfWidth);
-				float closestZ = glm::clamp(delta.z, -cubeHalfDepth, cubeHalfDepth);
-				float distanceXZSquared = (closestX * closestX) + (closestZ * closestZ);
-				float combinedRadius = cylinderRadius;
-				float horizontalOverlap = combinedRadius - sqrt(distanceXZSquared);
+				float distanceXZ = glm::length(glm::vec2(normal.x, normal.z)); 
 
-				if (distanceXZSquared >= combinedRadius * combinedRadius) {
-					continue; // No collision in the x-z plane
+				// estimare grosiera a distantei dintre centrele celor 2 obiecte
+				float combinedRadius = cylinderRadius + std::min(cubeHalfWidth, cubeHalfDepth)*1.41;
+				float horizontalOverlap = combinedRadius - distanceXZ;
+
+				if (horizontalOverlap <= 0) { continue; }
+
+				// bugfix daca obiectele se suprapun total
+				if (b.pos.x == a.pos.x &&
+					b.pos.y == a.pos.y &&
+					b.pos.z == a.pos.z)
+				{
+					a.pos -= 0.1;
+					b.pos += 0.1;
+
+					a.velocity = glm::reflect(a.velocity, glm::vec3(0, 1, 0));
+					b.velocity = glm::reflect(b.velocity, -glm::vec3(0, 1, 0));
+
+					continue;
 				}
 
-				// If there's no overlap in the vertical direction, there is no collision
-				if (verticalOverlap <= 0) {
-					continue; // No collision
+				if (glm::length(normal) < 0.3f)
+				{
+					a.pos -= 0.1;
+					b.pos += 0.1;
+
+					a.velocity = glm::reflect(a.velocity, glm::vec3(0, 1, 0));
+					b.velocity = glm::reflect(b.velocity, -glm::vec3(0, 1, 0));
+
+					continue;
 				}
 
-				// Collision detected, determine the axis of least penetration
-				glm::vec3 collisionNormal;
-				float penetration;
+				float overlappedSection;
 
-				// Determine the penetration depth
 				if (verticalOverlap < horizontalOverlap) {
-					// Vertical overlap is greater
-					penetration = -verticalOverlap;
-					collisionNormal = -glm::vec3(0.0f, (delta.y > 0 ? -1.0f : 1.0f), 0.0f); // Normal is up or down
+					overlappedSection = verticalOverlap;
+					normal = -glm::normalize(glm::vec3(0, normal.y > 0 ? 1 : -1, 0)); 
 				}
 				else {
-					// Horizontal overlap is greater
-					penetration = combinedRadius - std::sqrt(distanceXZSquared);
-					if (distanceXZSquared > 0) {
-						// Normal in the x-z plane
-						collisionNormal = glm::normalize(glm::vec3(delta.x, 0.0f, delta.z)); // Normal vector in x-z plane
+					overlappedSection = horizontalOverlap;
+					if (distanceXZ > 0) {
+						normal = glm::normalize(glm::vec3(normal.x > 0 ? 1 : -1, 0.0f, normal.z > 0 ? 1 : -1));
 					}
 					else {
-						// Arbitrary normal if the cylinder is exactly at the cube's axis
-						collisionNormal = glm::vec3(1.0f, 0.0f, 0.0f); // Can be any direction
+						normal = glm::vec3(1.0f, 0.0f, 0.0f); 
 					}
 				}
+				
+				b.pos -= normal * (overlappedSection / 2.0f); 
+				a.pos += normal * (overlappedSection / 2.0f);
 
-				// Separate the cylinder and cube along the collision normal by half the penetration depth
-				b.pos -= collisionNormal * (penetration / 2.0f); // Move the cube out
-				a.pos += collisionNormal * (penetration / 2.0f); // Optional adjustment for the cylinder
-
-				// Reflect the velocities along the collision normal
-				a.velocity = glm::reflect(a.velocity, collisionNormal);
-				b.velocity = glm::reflect(b.velocity, -collisionNormal);
+				a.velocity = glm::reflect(a.velocity, normal);
+				b.velocity = glm::reflect(b.velocity, -normal);
 
 
-			}
+			} 
 		}
 
 		// coliziunile cu cubul de sticla

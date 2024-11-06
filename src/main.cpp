@@ -16,15 +16,17 @@ int main(void)
 	for (int i = 0; i < 0; i++)
 	{
 
-		//engine.addSphere({ rand()%15-7, rand()%10 + 5, rand() % 15 - 7},
-		//	(rand()%3 + 1)/3.f);
-		//
-		engine.addCube({ rand() % ((int)engine.glassContainer.x -5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7},
-			{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1)});
+	   engine.addSphere({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5,
+				rand() % ((int)engine.glassContainer.z - 5) + 5 }, (rand() % 3 + 1) / 3.f);
 
-		engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
-			(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);		
-		engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+
+
+		engine.addCube({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2
+				},
+				{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1) });
+
+
+		engine.addCylindre({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2 },
 			(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
 
 	}
@@ -42,35 +44,25 @@ int main(void)
 	engine.addSphere({ 29, 45, 8 }, 1);
 	engine.addSphere({ 9, 20, 10 }, 1);
 
-	//engine.addCube({ 1, 2, 0 }, {2,2,2});
-	//engine.addCube({ 0, 4, 0 }, { 2,2,2 });
-	//engine.addCube({ 3, 25, 4 }, { 2,2,2 });
-	//engine.addCube({ 5, 22, 6 }, { 2,2,2 });
-	//engine.addCube({ 29, 45, 8 }, { 2,2,2 });
-	//engine.addCube({ 9, 20, 10 }, { 2,2,2 });
+	engine.addCube({ 1, 6, 0 }, {2,2,2});
+	engine.addCube({ 0, 4, 0 }, { 2,2,2 });
+	engine.addCube({ 3, 25, 4 }, { 2,2,2 });
+	engine.addCube({ 5, 22, 6 }, { 2,2,2 });
+	engine.addCube({ 29, 42, 8 }, { 2,2,2 });
+	engine.addCube({ 9, 20, 10 }, { 2,2,2 });
 
-	engine.addCylindre({ 1, 6, 0 }, 1, 1);
-	engine.addCylindre({ 0, 8, 0 }, 1, 1);
-	engine.addCylindre({ 3, 27, 4 }, 1, 1);
-	engine.addCylindre({ 5, 22, 6 }, 1, 1);
-	engine.addCylindre({ 29, 45, 8 }, 1, 1);
-	engine.addCylindre({ 9, 20, 10 }, 1, 1);
-
+	//engine.addCylindre({ 1, 8, 0 }, 1, 1);
+	//engine.addCylindre({ 1, 3, 3 }, 1, 1);
+	//engine.addCylindre({ 5, 3, 3 }, 1, 1);
+	//engine.addCylindre({ 7, 3, 3 }, 1, 1);
+	//engine.addCylindre({ 29, 45, 8 }, 1, 1);
+	//engine.addCylindre({ 7, 6, 0 }, 1, 1);
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(800, 600, "The Sims | Physics simulator");
 
 #pragma region imgui
 	rlImGuiSetup(true);
-
-	//you can use whatever imgui theme you like!
-	//ImGui::StyleColorsDark();
-	//imguiThemes::yellow();
-	//imguiThemes::gray();
-	imguiThemes::green();
-	//imguiThemes::red();
-	//imguiThemes::embraceTheDarkness();
-
 
 	ImGuiIO &io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
@@ -80,9 +72,7 @@ int main(void)
 	ImGuiStyle &style = ImGui::GetStyle();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
-		//style.WindowRounding = 0.0f;
 		style.Colors[ImGuiCol_WindowBg].w = 0.5f;
-		//style.Colors[ImGuiCol_DockingEmptyBg].w = 0.f;
 	}
 
 #pragma endregion
@@ -97,7 +87,7 @@ int main(void)
 
 	Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 
-	DisableCursor();                    // Limit cursor to relative movement inside the window
+	DisableCursor();                
 
 	SetTargetFPS(60);
 
@@ -164,46 +154,47 @@ int main(void)
 			}
 		}
 
-		std::cout << engine.objects.size() << '\n';
-
-		
 		if (option == 1) {
-			engine.glassContainer = { 50,50,50 };
+			engine.glassContainer = { 70,70,70 };
 			engine.objects.clear();
 
 			for (int i = 0; i < 500; i++)
 			{
 				if (i < 100) {
-				engine.addSphere({ rand()% ((int)engine.glassContainer.x - 5) -7, rand()% ((int)engine.glassContainer.y - 10) + 5, 
-					rand() % ((int)engine.glassContainer.z - 5) + 5}, (rand()%3 + 1)/3.f);
+				engine.addSphere({ rand()% ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand()% ((int)engine.glassContainer.y) - engine.glassContainer.y / 2,
+					rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2 }, (rand()%3 + 1)/3.f);
 				}
+				
 				if (i < 250) {
-					engine.addCube({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+					engine.addCube({rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2
+				},
 						{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1) });
 				}
 
-				engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+				engine.addCylindre({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x/2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2 },
 					(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
 
 			}
 			option = 0;
 		}
 		if (option == 2) {
-			engine.glassContainer = { 100,100,100 };
+			engine.glassContainer = { 200,200,200 };
 			engine.objects.clear();
 
 			for (int i = 0; i < 1000; i++)
 			{
 				if (i < 250) {
-					engine.addSphere({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5,
-						rand() % ((int)engine.glassContainer.z - 5) + 5 }, (rand() % 3 + 1) / 3.f);
+					engine.addSphere({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2,
+						rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2 }, (rand() % 3 + 1) / 3.f);
 				}
+
 				if (i < 500) {
-					engine.addCube({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+					engine.addCube({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2
+						},
 						{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1) });
 				}
 
-				engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+				engine.addCylindre({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2 },
 					(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
 
 			}
@@ -216,15 +207,17 @@ int main(void)
 			for (int i = 0; i < 2500; i++)
 			{
 				if (i < 500) {
-					engine.addSphere({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5,
-						rand() % ((int)engine.glassContainer.z - 5) + 5 }, (rand() % 3 + 1) / 3.f);
+					engine.addSphere({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2,
+						rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2 }, (rand() % 3 + 1) / 3.f);
 				}
+
 				if (i < 1000) {
-					engine.addCube({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+					engine.addCube({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2
+						},
 						{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1) });
 				}
 
-				engine.addCylindre({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, rand() % ((int)engine.glassContainer.z - 5) - 7 },
+				engine.addCylindre({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2 },
 					(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
 
 			}
@@ -277,14 +270,11 @@ int main(void)
 						o.size.x / 2.f, o.size.x / 2.f, o.size.y, 10,
 						{ 250,100,250,255 });
 
-
 				}
 
 			}
 
 		}
-
-
 
 		DrawGrid(engine.glassContainer.x, 1.0f);
 
@@ -296,11 +286,6 @@ int main(void)
 
 		EndMode3D();
 
-
-
-	
-
-	#pragma region imgui
 		rlImGuiEnd();
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -308,17 +293,11 @@ int main(void)
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
 		}
-	#pragma endregion
 
 		EndDrawing();
 	}
 
-
-#pragma region imgui
 	rlImGuiShutdown();
-#pragma endregion
-
-
 
 	CloseWindow();
 
