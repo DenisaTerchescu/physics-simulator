@@ -219,76 +219,63 @@ void PhysicsSimulator::update(float deltaTime)
 				b.velocity = glm::reflect(b.velocity, -normal);
 			}
 
-/////////////////////////////////
 			else if (a.type == CYLINDER && b.type == SPHERE)
 			{
-				float cylinderRadius = a.size.x / 2;  // Assuming size.x is the diameter of the cylinder
-				float cylinderHalfHeight = a.size.y / 2; // Assuming size.y is the total height of the cylinder
+				float cylinderRadius = a.size.x / 2; 
+				float cylinderHalfHeight = a.size.y / 2; 
 
-				float sphereRadius = b.size.x / 2; // Assuming size.x is the diameter of the sphere
+				float sphereRadius = b.size.x / 2; 
 
-				// Vector from the center of the cylinder to the center of the sphere
-				glm::vec3 delta = b.pos - a.pos;
+				glm::vec3 normal = b.pos - a.pos;
 
-				// Check if the sphere's y position is within the cylinder's height
-				if (std::abs(delta.y) > cylinderHalfHeight + sphereRadius) {
-					continue; // No collision if the sphere is above or below the cylinder
-				}
-
-				// Calculate the horizontal distance in the x-z plane
-				float distXZSquared = delta.x * delta.x + delta.z * delta.z;
-				float combinedRadius = cylinderRadius + sphereRadius;
-
-				// Check for collision in the x-z plane
-				if (distXZSquared >= combinedRadius * combinedRadius) {
-					continue; // No collision in the x-z plane
-				}
-
-				float verticalDistance = std::abs(delta.y);
+				float verticalDistance = std::abs(normal.y);
 				float verticalOverlap = (cylinderHalfHeight + sphereRadius) - verticalDistance;
-				float horizontalOverlap = combinedRadius - sqrt(distXZSquared);
 
-				// Collision detected, determine the collision normal
-				glm::vec3 collisionNormal;
+				if (verticalOverlap <= 0) {continue;}
 
-				// Calculate penetration depth in the x-z plane
-				float distXZ = sqrt(distXZSquared);
-				float penetration = combinedRadius - distXZ;
+				// se verifica suprapunerea pe orizontala
+				glm::vec2 normalXZ = glm::vec2(normal.x, normal.z);
+				float distXZ = glm::length(normalXZ);
+				float horizontalOverlap = cylinderRadius + sphereRadius - distXZ;
 
+				if (horizontalOverlap <=0) { continue; }
+
+				float overlappedSection;
+
+				// se determina axa unde obiectele s-au intersectat cel mai putin
 				if (verticalOverlap > horizontalOverlap) {
-					penetration = horizontalOverlap;
-					if (distXZSquared > 0) {
-						// Normal in the x-z plane
-						collisionNormal = -glm::normalize(glm::vec3(delta.x, 0.0f, delta.z)); // Normal vector in x-z plane
+					overlappedSection = horizontalOverlap;
+					if (distXZ > 0) {
+						normal = -glm::normalize(glm::vec3(normal.x, 0.0f, normal.z));
 					}
 					else {
-						// Arbitrary normal if sphere is exactly at the cylinder axis (center)
-						collisionNormal = glm::vec3(1.0f, 0.0f, 0.0f); // Can be any direction
+						// sfera si cilindrul sunt perfect aliniate pe verticala
+						normal = glm::vec3(1.0f, 0.0f, 0.0f); 
 					}
 				}
 				else 
 				{
-					// If the sphere is exactly at the cylinder axis (center)
-					if (delta.y > 0) {
-						penetration = std::abs(delta.y) - sphereRadius - cylinderHalfHeight;
-						collisionNormal = glm::vec3(0.0f, -1.0f, 0.0f); 
+					overlappedSection = verticalOverlap;
+
+					// se verifica daca sfera e deasupra cilindrului
+					if (normal.y > 0) {
+						normal = glm::vec3(0.0f, -1.0f, 0.0f); 
 					}
 					else {
-						penetration = -(std::abs(delta.y) - sphereRadius - cylinderHalfHeight);
-						collisionNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+						normal = glm::vec3(0.0f, 1.0f, 0.0f);
 					}
 				}
 
-				b.pos -= collisionNormal * (penetration / 2.0f); // Move the sphere out
-				a.pos += collisionNormal * (penetration / 2.0f); // Optional: Adjust the cylinder slightly (can be omitted)
+				b.pos -= normal * (overlappedSection / 2.0f);
+				a.pos += normal * (overlappedSection / 2.0f); 
 
-				b.velocity = glm::reflect(b.velocity, -collisionNormal);
-				a.velocity = glm::reflect(a.velocity, collisionNormal);
+				b.velocity = glm::reflect(b.velocity, -normal);
+				a.velocity = glm::reflect(a.velocity, normal);
 
 
 			}
 
-			//cylinder cube
+/////////////////////////////////////////////
 			else if (a.type == CYLINDER && b.type == CUBE) 
 			{
 				float cylinderRadius = a.size.x / 2;          // Assuming size.x is the diameter of the cylinder

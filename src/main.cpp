@@ -35,12 +35,12 @@ int main(void)
 	
 
 
-	//engine.addSphere({ 1, 2, 0 }, 1);
-	//engine.addSphere({ 0, 4, 0 }, 1);
-	//engine.addSphere({ 3, 25, 4 }, 1);
-	//engine.addSphere({ 5, 22, 6 }, 1);
-	//engine.addSphere({ 29, 45, 8 }, 1);
-	//engine.addSphere({ 9, 20, 10 }, 1);
+	engine.addSphere({ 1, 2, 0 }, 1);
+	engine.addSphere({ 0, 4, 0 }, 1);
+	engine.addSphere({ 3, 25, 4 }, 1);
+	engine.addSphere({ 5, 22, 6 }, 1);
+	engine.addSphere({ 29, 45, 8 }, 1);
+	engine.addSphere({ 9, 20, 10 }, 1);
 
 	//engine.addCube({ 1, 2, 0 }, {2,2,2});
 	//engine.addCube({ 0, 4, 0 }, { 2,2,2 });
@@ -49,7 +49,7 @@ int main(void)
 	//engine.addCube({ 29, 45, 8 }, { 2,2,2 });
 	//engine.addCube({ 9, 20, 10 }, { 2,2,2 });
 
-	engine.addCylindre({ 1, 2, 0 }, 1, 2);
+	engine.addCylindre({ 1, 1, 0 }, 1, 2);
 	engine.addCylindre({ 0, 4, 0 }, 1, 3);
 	engine.addCylindre({ 3, 25, 4 }, 1, 3);
 	engine.addCylindre({ 5, 22, 6 }, 1, 3);
