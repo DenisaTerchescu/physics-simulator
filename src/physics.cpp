@@ -231,14 +231,14 @@ void PhysicsSimulator::update(float deltaTime)
 				float verticalDistance = std::abs(normal.y);
 				float verticalOverlap = (cylinderHalfHeight + sphereRadius) - verticalDistance;
 
-				if (verticalOverlap <= 0) {continue;}
+				if (verticalOverlap < 0) {continue;}
 
 				// se verifica suprapunerea pe orizontala
 				glm::vec2 normalXZ = glm::vec2(normal.x, normal.z);
 				float distXZ = glm::length(normalXZ);
 				float horizontalOverlap = cylinderRadius + sphereRadius - distXZ;
 
-				if (horizontalOverlap <=0) { continue; }
+				if (horizontalOverlap < 0) { continue; }
 
 				float overlappedSection;
 
