@@ -231,7 +231,7 @@ void PhysicsSimulator::update(float deltaTime)
 				float verticalDistance = std::abs(normal.y);
 				float verticalOverlap = (cylinderHalfHeight + sphereRadius) - verticalDistance;
 
-				if (verticalOverlap < 0) {continue;}
+				if (verticalOverlap < 0) { continue;}
 
 				// se verifica suprapunerea pe orizontala
 				glm::vec2 normalXZ = glm::vec2(normal.x, normal.z);
@@ -272,10 +272,8 @@ void PhysicsSimulator::update(float deltaTime)
 				b.velocity = glm::reflect(b.velocity, -normal);
 				a.velocity = glm::reflect(a.velocity, normal);
 
-
 			}
 
-/////////////////////////////////////////////
 			else if (a.type == CYLINDER && b.type == CUBE) 
 			{
 				float cylinderRadius = a.size.x / 2;          // Assuming size.x is the diameter of the cylinder
