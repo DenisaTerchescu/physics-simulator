@@ -39,8 +39,6 @@ void PhysicsSimulator::update(float deltaTime)
 	{
 		Object& a = objects[i];
 
-		a.gravity = glm::vec3(0, -9.81, 0);
-
 		// forta de frecare cu aerul
 		float dragCoefficient = 0.9f;
 
@@ -180,55 +178,48 @@ void PhysicsSimulator::update(float deltaTime)
 				}
 
 			}
-//////////////////////////////////////////
+
 			else if (a.type == CYLINDER && b.type == CYLINDER)
 			{
-				float aRadius = a.size.x / 2;  // Assuming size.x is the diameter of the cylinder
-				float bRadius = b.size.x / 2;
+				float r1 = a.size.x / 2;  
+				float r2 = b.size.x / 2;
 
-				float aHalfHeight = a.size.y / 2;
-				float bHalfHeight = b.size.y / 2;
+				float halfHeight1 = a.size.y / 2;
+				float halfHeight2 = b.size.y / 2;
 
-				// Vector from center of cylinder A to center of cylinder B
 				glm::vec3 normal = b.pos - a.pos;
 
-				// Check y-axis overlap
-				float verticalOverlap = (aHalfHeight + bHalfHeight) - abs(normal.y);
-				if (verticalOverlap <= 0) continue; // No collision in the y-axis
+				// se verifica suprapunerea pe verticala
+				float verticalOverlap = (halfHeight1 + halfHeight2) - abs(normal.y);
+				if (verticalOverlap <= 0) continue; 
 
-				// Check horizontal (x-z plane) overlap as if they're circles
+				// se verifica suprapunerea pe orizontala
 				glm::vec2 normalXZ = glm::vec2(normal.x, normal.z);
-				float distXZSquared = glm::dot(normalXZ, normalXZ);
-				float combinedRadius = aRadius + bRadius;
+				float distXZ = glm::length(normalXZ);
+				float horizontalOverlap = r1 + r2 - distXZ;
 
-				if (distXZSquared >= combinedRadius * combinedRadius) continue; // No collision in the x-z plane
+				if (horizontalOverlap <= 0) continue;
 
-				// Collision detected, determine the axis of least penetration
-				glm::vec3 collisionNormal;
-				float penetration;
+				float overlappedSection;
 
-				if (verticalOverlap < combinedRadius - sqrt(distXZSquared)) {
-					// y-axis is the axis of least penetration
-					penetration = verticalOverlap;
-					collisionNormal = glm::vec3(0.0f, (normal.y < 0 ? -1.0f : 1.0f), 0.0f);
+				// se determina axa unde obiectele intra in coliziune cel mai putin
+				if (verticalOverlap < horizontalOverlap) {
+					overlappedSection = verticalOverlap;
+					normal = glm::normalize(glm::vec3(0.0f, normal.y, 0.0f));
 				}
 				else {
-					// x-z plane (horizontal) is the axis of least penetration
-					float distXZ = sqrt(distXZSquared);
-					penetration = combinedRadius - distXZ;
-					collisionNormal = glm::normalize(glm::vec3(normalXZ.x, 0.0f, normalXZ.y)); // 3D vector in x-z plane
+					overlappedSection = horizontalOverlap;
+					normal = glm::normalize(glm::vec3(normalXZ.x, 0.0f, normalXZ.y));
 				}
 
-				// Separate the cylinders along the collision normal by half the penetration depth
-				a.pos -= collisionNormal * (penetration / 2.0f);
-				b.pos += collisionNormal * (penetration / 2.0f);
+				a.pos -= normal * (overlappedSection / 2.0f);
+				b.pos += normal * (overlappedSection / 2.0f);
 
-				// Reflect the velocities along the collision normal
-				a.velocity = glm::reflect(a.velocity, collisionNormal);
-				b.velocity = glm::reflect(b.velocity, -collisionNormal);
+				a.velocity = glm::reflect(a.velocity, normal);
+				b.velocity = glm::reflect(b.velocity, -normal);
 			}
 
-			//cylinder sphere
+/////////////////////////////////
 			else if (a.type == CYLINDER && b.type == SPHERE)
 			{
 				float cylinderRadius = a.size.x / 2;  // Assuming size.x is the diameter of the cylinder

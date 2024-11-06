@@ -12,7 +12,7 @@ struct Object
 	glm::vec3 pos = {};
 	glm::vec3 size = {};
 	glm::vec3 velocity = {};
-	glm::vec3 gravity = {};
+	glm::vec3 gravity = { 0, -9.81, 0 };
 	particle type = CUBE;
 	
 	glm::vec3 calculateMinimumPoint() { return pos - size / 2.f; }
