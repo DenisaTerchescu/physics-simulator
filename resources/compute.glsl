@@ -246,7 +246,61 @@ void main()
 				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
 				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 			}
+			// cylinder - sphere collision
+			else if (writeBodies[i].type == 2 && writeBodies[j].type == 0)
+			{
+				float cylinderRadius = writeBodies[i].size.x / 2;
+				float cylinderHalfHeight = writeBodies[i].size.y / 2;
 
+				float sphereRadius = writeBodies[j].size.x / 2;
+
+				vec3 normal = writeBodies[j].pos - writeBodies[i].pos;
+
+				float verticalDistance = abs(normal.y);
+				float verticalOverlap = (cylinderHalfHeight + sphereRadius) - verticalDistance;
+
+				if (verticalOverlap < 0) { continue; }
+
+				// se verifica suprapunerea pe orizontala
+				vec2 normalXZ = vec2(normal.x, normal.z);
+				float distXZ = length(normalXZ);
+				float horizontalOverlap = cylinderRadius + sphereRadius - distXZ;
+
+				if (horizontalOverlap < 0) { continue; }
+
+				float overlappedSection;
+
+				// se determina axa unde obiectele s-au intersectat cel mai putin
+				if (verticalOverlap > horizontalOverlap && (normal.x != 0 || normal.z != 0)) {
+					overlappedSection = horizontalOverlap;
+					if (distXZ > 0) {
+						normal = -normalize(vec3(normal.x, 0, normal.z));
+						//normal = -normalize(vec3(1, 0.0f, 1));
+					}
+					else {
+						normal = vec3(1.0f, 0.0f, 0.0f);
+					}
+				}
+				else
+				{
+					overlappedSection = verticalOverlap;
+
+					// se verifica daca sfera e deasupra cilindrului
+					if (normal.y > 0) {
+						normal = vec3(0.0f, -1.0f, 0.0f);
+					}
+					else {
+						normal = vec3(0.0f, 1.0f, 0.0f);
+					}
+				}
+
+				writeBodies[j].pos -= normal * (overlappedSection / 2.0f);
+				writeBodies[i].pos += normal * (overlappedSection / 2.0f);
+
+				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
+
+				}
 
 
 		}
