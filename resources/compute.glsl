@@ -30,6 +30,7 @@ restrict layout(std430, binding = 1) buffer writeBuffer
 
 uniform int objectsCount;
 uniform float deltaTime;
+uniform vec3 glassContainer;
 
 vec3 calculateMinimumPoint(inout Object b)
 {
@@ -75,7 +76,6 @@ void main()
 
 		vec3 minPos = calculateMinimumPoint(writeBodies[i]);
 		vec3 maxPos = calculateMaximumPoint(writeBodies[i]);
-		vec3 glassContainer = { 20, 20, 20 };
 
 		if (minPos.y < 0)
 		{

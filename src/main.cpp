@@ -109,6 +109,7 @@ int main(void)
 
 	int objectsCountUniform = rlGetLocationUniform(computeShader, "objectsCount");
 	int deltaTimeUniform = rlGetLocationUniform(computeShader, "deltaTime");
+	int glassContainerUniform = rlGetLocationUniform(computeShader, "glassContainer");
 
 	if (!renderOnCPU)
 	{
@@ -160,6 +161,7 @@ int main(void)
 				float dt = GetFrameTime();
 				rlSetUniform(objectsCountUniform, &count, SHADER_UNIFORM_INT, 1);
 				rlSetUniform(deltaTimeUniform, &dt, SHADER_UNIFORM_FLOAT, 1);
+				rlSetUniform(glassContainerUniform, &engine.glassContainer, SHADER_UNIFORM_VEC3, 1);
 
 				rlComputeShaderDispatch(count, 1, 1);
 				rlDisableShader();
