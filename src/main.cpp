@@ -1,6 +1,5 @@
 #include "raylib.h"
 
-//#include <GLFW/glfw3.h>	
 #include <iostream>
 
 #include "rlgl.h"
@@ -15,6 +14,7 @@ PhysicsSimulator engine;
 
 int currentShaderReadsBuffer = 0;
 unsigned int buffers[2];
+bool renderOnCPU = false;
 
 void createGPUBuffers() {
 	buffers[0] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
@@ -28,11 +28,6 @@ void updateBuffers() {
 
 	buffers[0] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
 	buffers[1] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
-
-	//rlUpdateShaderBuffer(buffers[0], engine.objects.data(),
-	//	engine.objects.size() * sizeof(engine.objects[0]), 0);
-	//rlUpdateShaderBuffer(buffers[1], engine.objects.data(),
-	//	engine.objects.size() * sizeof(engine.objects[0]), 0);
 }
 
 void readBuffers() {
@@ -95,15 +90,8 @@ int main(void)
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(800, 600, "The Sims | Physics simulator");
 
-	//if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-	//	CloseWindow();
-	//	printf("Failed to initialize OpenGL context\n");
-	//	return -1;
-	//}
-	//printf("!!!!!!!!!!!!!OpenGL Version: %s\n", glGetString(GL_VERSION));
 
 	
-	 // Create a shader program with the compute shader
 	unsigned int computeShader = 0;
 	{
 		char* code = LoadFileText(RESOURCES_PATH "compute.glsl");
@@ -113,17 +101,20 @@ int main(void)
 	}
 
 	if (computeShader) {
-		std::cout << "LOADED COMPUTE!!!\n";
+		std::cout << "Compute shader loaded successfully!!\n";
 	}
 	else {
-		std::cout << "ERROR WITH COMPUTE!!!!!!!!!!!!!!\n";
+		std::cout << "Compute shader error!! \n";
 	}
 
 	int objectsCountUniform = rlGetLocationUniform(computeShader, "objectsCount");
 	int deltaTimeUniform = rlGetLocationUniform(computeShader, "deltaTime");
 
-	createGPUBuffers();
-	updateBuffers();
+	if (!renderOnCPU)
+	{
+		createGPUBuffers();
+		updateBuffers();
+	}
 
 #pragma region imgui
 	rlImGuiSetup(true);
@@ -159,18 +150,20 @@ int main(void)
 	{
 
 #pragma region compute
-		{
-			rlEnableShader(computeShader);
-			rlBindShaderBuffer(buffers[currentShaderReadsBuffer], 0);
-			rlBindShaderBuffer(buffers[!currentShaderReadsBuffer], 1);
+		if (!renderOnCPU) {
+			{
+				rlEnableShader(computeShader);
+				rlBindShaderBuffer(buffers[currentShaderReadsBuffer], 0);
+				rlBindShaderBuffer(buffers[!currentShaderReadsBuffer], 1);
 
-			int count = engine.objects.size();
-			float dt = GetFrameTime();
-			rlSetUniform(objectsCountUniform, &count, SHADER_UNIFORM_INT, 1);
-			rlSetUniform(deltaTimeUniform, &dt, SHADER_UNIFORM_FLOAT, 1);
+				int count = engine.objects.size();
+				float dt = GetFrameTime();
+				rlSetUniform(objectsCountUniform, &count, SHADER_UNIFORM_INT, 1);
+				rlSetUniform(deltaTimeUniform, &dt, SHADER_UNIFORM_FLOAT, 1);
 
-			rlComputeShaderDispatch(count, 1, 1);
-			rlDisableShader();
+				rlComputeShaderDispatch(count, 1, 1);
+				rlDisableShader();
+			}
 		}
 #pragma endregion
 
@@ -189,8 +182,10 @@ int main(void)
 		ImGui::PopStyleColor(2);
 	#pragma endregion
 
+		if (renderOnCPU) {
+			engine.update(GetFrameTime());
+		}
 		
-		//engine.update(GetFrameTime());
 
 
 		DrawRectangle(GetScreenWidth() - 370, 10, 500, 250, PINK);
@@ -231,6 +226,9 @@ int main(void)
 		if (IsKeyPressed('1')) option = 1;
 		if (IsKeyPressed('2')) option = 2;
 		if (IsKeyPressed('3')) option = 3;
+
+		if (IsKeyPressed(KEY_ENTER)) renderOnCPU = !renderOnCPU;
+
 		if (IsKeyPressed('R')) {
 			for (Object& o : engine.objects) {
 				o.pos = { rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, 
@@ -380,7 +378,10 @@ int main(void)
 
 		EndDrawing();
 
-		readBuffers();
+		if(!renderOnCPU)
+		{
+			readBuffers();
+		}
 	}
 
 	rlImGuiShutdown();
