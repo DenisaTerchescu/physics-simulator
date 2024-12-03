@@ -300,6 +300,79 @@ void main()
 				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
 
+			}
+			// cylinder - cube collision
+			else if (writeBodies[i].type == 2 && writeBodies[j].type == 1)
+			{
+				float cylinderRadius = writeBodies[i].size.x / 2;
+				float cylinderHalfHeight = writeBodies[i].size.y / 2;
+
+				float cubeHalfWidth = writeBodies[j].size.x / 2;
+				float cubeHalfHeight = writeBodies[j].size.y / 2;
+				float cubeHalfDepth = writeBodies[j].size.z / 2;
+
+				vec3 normal = writeBodies[j].pos - writeBodies[i].pos;
+
+				float verticalOverlap = (cylinderHalfHeight + cubeHalfHeight) - abs(normal.y);
+
+				if (verticalOverlap <= 0) { continue; }
+
+				float distanceXZ = length(vec2(normal.x, normal.z));
+
+				// estimare grosiera a distantei dintre centrele celor 2 obiecte
+				float combinedRadius = cylinderRadius + min(cubeHalfWidth, cubeHalfDepth) * 1.41;
+				float horizontalOverlap = combinedRadius - distanceXZ;
+
+				if (horizontalOverlap <= 0) { continue; }
+
+				// bugfix daca obiectele se suprapun total
+				if (writeBodies[j].pos.x == writeBodies[i].pos.x &&
+					writeBodies[j].pos.y == writeBodies[i].pos.y &&
+					writeBodies[j].pos.z == writeBodies[i].pos.z)
+				{
+					writeBodies[i].pos -= 0.1;
+					writeBodies[j].pos += 0.1;
+
+					writeBodies[i].velocity = reflect(writeBodies[i].velocity, vec3(0, 1, 0));
+					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -vec3(0, 1, 0));
+
+					continue;
+				}
+
+				if (length(normal) < 0.3f)
+				{
+					writeBodies[i].pos -= 0.1;
+					writeBodies[j].pos += 0.1;
+
+					writeBodies[i].velocity = reflect(writeBodies[i].velocity, vec3(0, 1, 0));
+					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -vec3(0, 1, 0));
+
+					continue;
+				}
+
+				float overlappedSection;
+
+				if (verticalOverlap < horizontalOverlap) {
+					overlappedSection = verticalOverlap;
+					normal = -normalize(vec3(0, normal.y > 0 ? 1 : -1, 0));
+				}
+				else {
+					overlappedSection = horizontalOverlap;
+					if (distanceXZ > 0) {
+						normal = normalize(vec3(normal.x > 0 ? 1 : -1, 0.0f, normal.z > 0 ? 1 : -1));
+					}
+					else {
+						normal = vec3(1.0f, 0.0f, 0.0f);
+					}
+				}
+
+				writeBodies[j].pos -= normal * (overlappedSection / 2.0f);
+				writeBodies[i].pos += normal * (overlappedSection / 2.0f);
+
+				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
+				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+
+
 				}
 
 
