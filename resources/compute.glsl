@@ -32,14 +32,14 @@ uniform int objectsCount;
 uniform float deltaTime;
 uniform vec3 glassContainer;
 
-vec3 calculateMinimumPoint(inout Object b)
+vec3 calculateMinimumPoint(inout Object o)
 {
-	return b.pos - b.size / 2.f;
+	return o.pos - o.size / 2.f;
 }
 
-vec3 calculateMaximumPoint(inout Object b)
+vec3 calculateMaximumPoint(inout Object o)
 {
-	return b.pos + b.size / 2.f;
+	return o.pos + o.size / 2.f;
 }
 
 void main()
@@ -72,6 +72,183 @@ void main()
 			{
 				continue;
 			}
+
+			// sphere - sphere collision
+			if (writeBodies[i].type == 0 && writeBodies[j].type == 0)
+			{
+				// razele celor 2 sfere
+				float r1 = writeBodies[i].size.x / 2;
+				float r2 = writeBodies[j].size.x / 2;
+
+				// vectorul dat de centrele sferelor
+				vec3 normal = writeBodies[j].pos - writeBodies[i].pos;
+
+				// distanta dintre cele 2 centre
+				float distance = length(normal);
+
+				if (distance < abs(r1 + r2))
+				{
+					normal = normalize(normal);
+
+					float interlappedSection = (r1 + r2) - distance;
+
+					writeBodies[i].pos -= normal * interlappedSection / 2.f;
+					writeBodies[j].pos += normal * interlappedSection / 2.f;
+
+					writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
+					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+				}
+
+			}
+			// cube - cube collision
+			else if (writeBodies[i].type == 1 && writeBodies[j].type == 1)
+			{
+
+				float halfWidth1 = writeBodies[i].size.x / 2;
+				float halfHeight1 = writeBodies[i].size.y / 2;
+				float halfDepth1 = writeBodies[i].size.z / 2;
+
+				float halfWidth2 = writeBodies[j].size.x / 2;
+				float halfHeight2 = writeBodies[j].size.y / 2;
+				float halfDepth2 = writeBodies[j].size.z / 2;
+
+				// vectorul dat de centrele celor 2 cuburi
+				vec3 normal = writeBodies[j].pos - writeBodies[i].pos;
+
+				// cat se intersecteaza pe axa X
+				float overlapX = abs(halfWidth1) + abs(halfWidth2) - abs(normal.x);
+
+				if (overlapX <= 0) continue;
+
+				if (normal.x == 0 && normal.y == 0 && normal.z == 0) continue;
+
+				// cat se intersecteaza pe axa Y
+				float overlapY = abs(halfHeight1) + abs(halfHeight2) - abs(normal.y);
+
+				if (overlapY <= 0) continue;
+
+				// cat se intersecteaza pe axa Z
+				float overlapZ = abs(halfDepth1) + abs(halfDepth2) - abs(normal.z);
+
+				if (overlapZ <= 0) continue;
+
+				float overlappedSection;
+
+				// determinam axa unde cuburile s-au intersectat cel mai putin
+				if (overlapX < overlapY && overlapX < overlapZ) {
+					overlappedSection = overlapX;
+					//normal = normalize(vec3(normal.x, 0, 0));
+					normal = vec3(normal.x > 0 ? 1 : -1, 0, 0);
+				}
+				else if (overlapY < overlapZ) {
+					overlappedSection = overlapY;
+					//normal = normalize(vec3(0, normal.y, 0));
+					normal = vec3(0, normal.y > 0 ? 1 : -1, 0);
+				}
+				else {
+					overlappedSection = overlapZ;
+					//normal = normalize(vec3(0, 0, normal.z));
+					normal = vec3(0, 0, normal.z > 0 ? 1 : -1);
+				}
+
+				writeBodies[i].pos -= normal * (overlappedSection / 2.0f);
+				writeBodies[j].pos += normal * (overlappedSection / 2.0f);
+				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
+				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+
+			}
+
+			// cube - sphere collision
+			else if (writeBodies[i].type == 1 && writeBodies[j].type == 0)
+			{
+				float r = writeBodies[j].size.x / 2;
+
+				vec3 closestCubeCorner = writeBodies[j].pos;
+
+				// varfurile minime si maxime ale cubului
+				vec3 boxMin = calculateMinimumPoint(writeBodies[i]);
+				vec3 boxMax = calculateMaximumPoint(writeBodies[i]);
+
+				// mutam centrul sferei catre cel mai apropiat varf al cubului
+				closestCubeCorner = clamp(closestCubeCorner, boxMin, boxMax);
+
+				// bugfix daca obiectele se suprapun total
+				if (closestCubeCorner.x == writeBodies[j].pos.x &&
+					closestCubeCorner.y == writeBodies[j].pos.y &&
+					closestCubeCorner.z == writeBodies[j].pos.z)
+				{
+					writeBodies[i].pos -= 0.1;
+					writeBodies[j].pos += 0.1;
+
+					writeBodies[i].velocity = reflect(writeBodies[i].velocity, vec3(0, 1, 0));
+					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -vec3(0, 1, 0));
+
+					continue;
+				}
+
+				// distanta dintre centrele celor 2 obiecte
+				float distance = length(closestCubeCorner - writeBodies[j].pos);
+
+				if (distance < r)
+				{
+					vec3 normal = writeBodies[j].pos - closestCubeCorner;
+					normal = normalize(normal);
+
+					float overlappedSection = r - distance;
+
+					writeBodies[i].pos -= normal * overlappedSection / 2.f;
+					writeBodies[j].pos += normal * overlappedSection / 2.f;
+
+					writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
+					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+				}
+
+			}
+			// cylinder - cylinder collision
+			else if (writeBodies[i].type == 2 && writeBodies[j].type == 2)
+			{
+				float r1 = writeBodies[i].size.x / 2;
+				float r2 = writeBodies[j].size.x / 2;
+
+				float halfHeight1 = writeBodies[i].size.y / 2;
+				float halfHeight2 = writeBodies[j].size.y / 2;
+
+				vec3 normal = writeBodies[j].pos - writeBodies[i].pos;
+
+				// se verifica suprapunerea pe verticala
+				float verticalOverlap = (halfHeight1 + halfHeight2) - abs(normal.y);
+				if (verticalOverlap <= 0) continue;
+
+				// se verifica suprapunerea pe orizontala
+				vec2 normalXZ = vec2(normal.x, normal.z);
+				float distXZ = length(normalXZ);
+				float horizontalOverlap = r1 + r2 - distXZ;
+
+				if (horizontalOverlap <= 0) continue;
+
+				float overlappedSection;
+
+				// se determina axa unde obiectele intra in coliziune cel mai putin
+				if (verticalOverlap < horizontalOverlap) {
+					overlappedSection = verticalOverlap;
+					//normal = normalize(vec3(0.0f, normal.y, 0.0f));
+					normal = normalize(vec3(0.0f, normal.y > 0 ? 1 : -1, 0.0f));
+				}
+				else {
+					overlappedSection = horizontalOverlap;
+					normal = normalize(vec3(normalXZ.x > 0 ? 1 : -1, 0.0f, normalXZ.y > 0 ? 1 : -1));
+					//normal = normalize(vec3(1, 0.0f, 1));
+				}
+
+				writeBodies[i].pos -= normal * (overlappedSection / 2.0f);
+				writeBodies[j].pos += normal * (overlappedSection / 2.0f);
+
+				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
+				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+			}
+
+
+
 		}
 
 		vec3 minPos = calculateMinimumPoint(writeBodies[i]);

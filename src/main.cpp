@@ -236,6 +236,7 @@ int main(void)
 				o.pos = { rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5, 
 					 rand() % ((int)engine.glassContainer.z - 5) - 7 };
 			}
+			updateBuffers();
 		}
 
 		if (option == 1) {
