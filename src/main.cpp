@@ -1,5 +1,9 @@
 #include "raylib.h"
+
+//#include <GLFW/glfw3.h>	
 #include <iostream>
+
+#include "rlgl.h"
 
 #include "imgui.h"
 #include "rlImGui.h"
@@ -7,11 +11,41 @@
 
 #include <physics.h>
 
+PhysicsSimulator engine;
+
+int currentShaderReadsBuffer = 0;
+unsigned int buffers[2];
+
+void createGPUBuffers() {
+	buffers[0] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
+	buffers[1] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
+}
+
+void updateBuffers() {
+
+	rlUnloadShaderBuffer(buffers[0]);
+	rlUnloadShaderBuffer(buffers[1]);
+
+	buffers[0] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
+	buffers[1] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
+
+	//rlUpdateShaderBuffer(buffers[0], engine.objects.data(),
+	//	engine.objects.size() * sizeof(engine.objects[0]), 0);
+	//rlUpdateShaderBuffer(buffers[1], engine.objects.data(),
+	//	engine.objects.size() * sizeof(engine.objects[0]), 0);
+}
+
+void readBuffers() {
+
+	rlReadShaderBuffer(buffers[!currentShaderReadsBuffer], engine.objects.data(),
+		engine.objects.size() * sizeof(engine.objects[0]), 0);
+
+	currentShaderReadsBuffer = !currentShaderReadsBuffer;
+}
 
 int main(void)
 {
 
-	PhysicsSimulator engine;
 
 	for (int i = 0; i < 0; i++)
 	{
@@ -61,6 +95,36 @@ int main(void)
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(800, 600, "The Sims | Physics simulator");
 
+	//if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+	//	CloseWindow();
+	//	printf("Failed to initialize OpenGL context\n");
+	//	return -1;
+	//}
+	//printf("!!!!!!!!!!!!!OpenGL Version: %s\n", glGetString(GL_VERSION));
+
+	
+	 // Create a shader program with the compute shader
+	unsigned int computeShader = 0;
+	{
+		char* code = LoadFileText(RESOURCES_PATH "compute.glsl");
+		unsigned int shader = rlCompileShader(code, RL_COMPUTE_SHADER);
+		computeShader = rlLoadComputeShaderProgram(shader);
+		UnloadFileText(code);
+	}
+
+	if (computeShader) {
+		std::cout << "LOADED COMPUTE!!!\n";
+	}
+	else {
+		std::cout << "ERROR WITH COMPUTE!!!!!!!!!!!!!!\n";
+	}
+
+	int objectsCountUniform = rlGetLocationUniform(computeShader, "objectsCount");
+	int deltaTimeUniform = rlGetLocationUniform(computeShader, "deltaTime");
+
+	createGPUBuffers();
+	updateBuffers();
+
 #pragma region imgui
 	rlImGuiSetup(true);
 
@@ -93,6 +157,25 @@ int main(void)
 
 	while (!WindowShouldClose())
 	{
+
+#pragma region compute
+		{
+			rlEnableShader(computeShader);
+			rlBindShaderBuffer(buffers[currentShaderReadsBuffer], 0);
+			rlBindShaderBuffer(buffers[!currentShaderReadsBuffer], 1);
+
+			int count = engine.objects.size();
+			float dt = GetFrameTime();
+			rlSetUniform(objectsCountUniform, &count, SHADER_UNIFORM_INT, 1);
+			rlSetUniform(deltaTimeUniform, &dt, SHADER_UNIFORM_FLOAT, 1);
+
+			rlComputeShaderDispatch(count, 1, 1);
+			rlDisableShader();
+		}
+#pragma endregion
+
+
+
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
 		DrawFPS(10, 10);
@@ -106,7 +189,8 @@ int main(void)
 		ImGui::PopStyleColor(2);
 	#pragma endregion
 
-		engine.update(GetFrameTime());
+		
+		//engine.update(GetFrameTime());
 
 
 		DrawRectangle(GetScreenWidth() - 370, 10, 500, 250, PINK);
@@ -140,7 +224,7 @@ int main(void)
 				engine.addCylindre({ rand() % 15 - 7, rand() % 10 + 5, rand() % 15 - 7 },
 					(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
 			}
-
+			updateBuffers();
 		}
 
 		if (IsKeyPressed('Z')) camera.target = Vector3{ 0.0f, 0.0f, 0.0f };
@@ -295,6 +379,8 @@ int main(void)
 		}
 
 		EndDrawing();
+
+		readBuffers();
 	}
 
 	rlImGuiShutdown();

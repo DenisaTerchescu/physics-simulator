@@ -16,6 +16,10 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Raylib as static libraries" FORCE)
 
+# Set the OpenGL version
+set(OPENGL_VERSION "4.3" CACHE STRING "Specify OpenGL version for raylib" FORCE)
+option(SUPPORT_GLFW "Use GLFW as window/context manager" ON)
+option(SUPPORT_GLAD "Use glad" OFF)
 
 project(physicsSimulator)
 
@@ -24,6 +28,7 @@ add_subdirectory(thirdparty/raylib-5.0)
 add_subdirectory(thirdparty/imgui-docking)
 add_subdirectory(thirdparty/rlImGui)
 add_subdirectory(thirdparty/glm)
+add_subdirectory(thirdparty/glad)
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
@@ -58,5 +63,5 @@ endif()
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE 
-	raylib_static imgui rlimgui glm
+	raylib_static imgui rlimgui glm glad glfw
 )

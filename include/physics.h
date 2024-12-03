@@ -3,20 +3,27 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-enum particle {
+enum particle : int{
 	CUBE, SPHERE, CYLINDER
 };
 
 struct Object
 {
 	glm::vec3 pos = {};
+	float padding;
 	glm::vec3 size = {};
+	float padding2;
+
 	glm::vec3 velocity = {};
+	float padding3;
+
 	glm::vec3 gravity = { 0,-9.81,0 };
 	particle type = CUBE;
 	
 	glm::vec3 calculateMinimumPoint() { return pos - size / 2.f; }
+
 	glm::vec3 calculateMaximumPoint() { return pos + size / 2.f; }
+
 };
 
 struct PhysicsSimulator
