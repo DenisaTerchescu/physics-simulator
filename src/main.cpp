@@ -10,11 +10,20 @@
 
 #include <physics.h>
 
+
+//enable GPU
+extern "C"
+{
+	__declspec(dllexport) unsigned long NvOptimusEnablement = 1;
+	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+
+
 PhysicsSimulator engine;
 
-int currentShaderReadsBuffer = 0;
+int currentShaderReadsBuffer = 0; 
 unsigned int buffers[2];
-bool renderOnCPU = false;
+bool simulateOnCPU = false;
 
 void createGPUBuffers() {
 	buffers[0] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
@@ -32,8 +41,11 @@ void updateBuffers() {
 
 void readBuffers() {
 
-	rlReadShaderBuffer(buffers[!currentShaderReadsBuffer], engine.objects.data(),
-		engine.objects.size() * sizeof(engine.objects[0]), 0);
+	if (currentShaderReadsBuffer)
+	{
+		rlReadShaderBuffer(buffers[!currentShaderReadsBuffer], engine.objects.data(),
+			engine.objects.size() * sizeof(engine.objects[0]), 0);
+	};
 
 	currentShaderReadsBuffer = !currentShaderReadsBuffer;
 }
@@ -111,7 +123,7 @@ int main(void)
 	int deltaTimeUniform = rlGetLocationUniform(computeShader, "deltaTime");
 	int glassContainerUniform = rlGetLocationUniform(computeShader, "glassContainer");
 
-	if (!renderOnCPU)
+	if (!simulateOnCPU)
 	{
 		createGPUBuffers();
 		updateBuffers();
@@ -151,7 +163,7 @@ int main(void)
 	{
 
 #pragma region compute
-		if (!renderOnCPU) {
+		if (!simulateOnCPU) {
 			{
 				rlEnableShader(computeShader);
 				rlBindShaderBuffer(buffers[currentShaderReadsBuffer], 0);
@@ -163,7 +175,7 @@ int main(void)
 				rlSetUniform(deltaTimeUniform, &dt, SHADER_UNIFORM_FLOAT, 1);
 				rlSetUniform(glassContainerUniform, &engine.glassContainer, SHADER_UNIFORM_VEC3, 1);
 
-				rlComputeShaderDispatch(count, 1, 1);
+				rlComputeShaderDispatch((count + 63)/ 64, 1, 1);
 				rlDisableShader();
 			}
 		}
@@ -184,7 +196,7 @@ int main(void)
 		ImGui::PopStyleColor(2);
 	#pragma endregion
 
-		if (renderOnCPU) {
+		if (simulateOnCPU) {
 			engine.update(GetFrameTime());
 		}
 		
@@ -229,7 +241,7 @@ int main(void)
 		if (IsKeyPressed('2')) option = 2;
 		if (IsKeyPressed('3')) option = 3;
 
-		if (IsKeyPressed(KEY_ENTER)) renderOnCPU = !renderOnCPU;
+		if (IsKeyPressed(KEY_ENTER)) simulateOnCPU = !simulateOnCPU;
 
 		if (IsKeyPressed('R')) {
 			for (Object& o : engine.objects) {
@@ -261,6 +273,7 @@ int main(void)
 
 			}
 			option = 0;
+			updateBuffers();
 		}
 		if (option == 2) {
 			engine.glassContainer = { 200,200,200 };
@@ -284,6 +297,7 @@ int main(void)
 
 			}
 			option = 0;
+			updateBuffers();
 		}
 		if (option == 3) {
 			engine.glassContainer = { 300,300,300 };
@@ -307,6 +321,7 @@ int main(void)
 
 			}
 			option = 0;
+			updateBuffers();
 		}
 		//----------------------------------------------------------------------------------
 
@@ -381,7 +396,7 @@ int main(void)
 
 		EndDrawing();
 
-		if(!renderOnCPU)
+		if(!simulateOnCPU)
 		{
 			readBuffers();
 		}

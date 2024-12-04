@@ -1,6 +1,6 @@
 #version 430 core
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 
 struct Object
@@ -45,13 +45,21 @@ vec3 calculateMaximumPoint(inout Object o)
 void main()
 {
 
-	uint i = gl_WorkGroupID.x;
+	// Number of invocations per work group
+	// Total invocations per work group (since it's 1D, it's just local_size_x)
+	uint invocationsPerGroup = gl_WorkGroupSize.x;
+
+	// Simplified global index using only the X component
+	uint globalIndex = gl_WorkGroupID.x * invocationsPerGroup + gl_LocalInvocationID.x;
+
+
+	uint i = globalIndex;
 	writeBodies[i] = readBodies[i];
 
 	//writeBodies[i].pos -= vec3(0, 1 * deltaTime, 0);
 
-
-	for (int i = 0; i < objectsCount; i++)
+	//the first for dissapears, we assign a thread for each iteration of it
+	//for (int i = 0; i < objectsCount; i++)
 	{
 
 		// forta de frecare cu aerul
@@ -61,7 +69,6 @@ void main()
 			writeBodies[i].velocity += deltaTime * writeBodies[i].gravity;
 			writeBodies[i].pos += deltaTime * writeBodies[i].velocity;
 			writeBodies[i].velocity -= writeBodies[i].velocity * deltaTime * dragCoefficient;
-
 		}
 
 		for (int j = 0; j < objectsCount; j++)
@@ -72,6 +79,7 @@ void main()
 			{
 				continue;
 			}
+			
 
 			// sphere - sphere collision
 			if (writeBodies[i].type == 0 && writeBodies[j].type == 0)
@@ -93,10 +101,10 @@ void main()
 					float interlappedSection = (r1 + r2) - distance;
 
 					writeBodies[i].pos -= normal * interlappedSection / 2.f;
-					writeBodies[j].pos += normal * interlappedSection / 2.f;
+					//writeBodies[j].pos += normal * interlappedSection / 2.f;
 
 					writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
-					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+					//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 				}
 
 			}
@@ -152,9 +160,9 @@ void main()
 				}
 
 				writeBodies[i].pos -= normal * (overlappedSection / 2.0f);
-				writeBodies[j].pos += normal * (overlappedSection / 2.0f);
+				//writeBodies[j].pos += normal * (overlappedSection / 2.0f);
 				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
-				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+				//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 
 			}
 
@@ -178,10 +186,10 @@ void main()
 					closestCubeCorner.z == writeBodies[j].pos.z)
 				{
 					writeBodies[i].pos -= 0.1;
-					writeBodies[j].pos += 0.1;
+					//writeBodies[j].pos += 0.1;
 
 					writeBodies[i].velocity = reflect(writeBodies[i].velocity, vec3(0, 1, 0));
-					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -vec3(0, 1, 0));
+					//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -vec3(0, 1, 0));
 
 					continue;
 				}
@@ -197,10 +205,10 @@ void main()
 					float overlappedSection = r - distance;
 
 					writeBodies[i].pos -= normal * overlappedSection / 2.f;
-					writeBodies[j].pos += normal * overlappedSection / 2.f;
+					//writeBodies[j].pos += normal * overlappedSection / 2.f;
 
 					writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
-					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+					//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 				}
 
 			}
@@ -241,10 +249,10 @@ void main()
 				}
 
 				writeBodies[i].pos -= normal * (overlappedSection / 2.0f);
-				writeBodies[j].pos += normal * (overlappedSection / 2.0f);
+				//writeBodies[j].pos += normal * (overlappedSection / 2.0f);
 
 				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
-				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+				//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 			}
 			// cylinder - sphere collision
 			else if (writeBodies[i].type == 2 && writeBodies[j].type == 0)
@@ -294,10 +302,10 @@ void main()
 					}
 				}
 
-				writeBodies[j].pos -= normal * (overlappedSection / 2.0f);
+				//writeBodies[j].pos -= normal * (overlappedSection / 2.0f);
 				writeBodies[i].pos += normal * (overlappedSection / 2.0f);
 
-				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+				//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
 
 			}
@@ -342,10 +350,10 @@ void main()
 				if (length(normal) < 0.3f)
 				{
 					writeBodies[i].pos -= 0.1;
-					writeBodies[j].pos += 0.1;
+					//writeBodies[j].pos += 0.1;
 
 					writeBodies[i].velocity = reflect(writeBodies[i].velocity, vec3(0, 1, 0));
-					writeBodies[j].velocity = reflect(writeBodies[j].velocity, -vec3(0, 1, 0));
+					//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -vec3(0, 1, 0));
 
 					continue;
 				}
@@ -367,10 +375,10 @@ void main()
 				}
 
 				writeBodies[j].pos -= normal * (overlappedSection / 2.0f);
-				writeBodies[i].pos += normal * (overlappedSection / 2.0f);
+				//writeBodies[i].pos += normal * (overlappedSection / 2.0f);
 
 				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
-				writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
+				//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 
 
 				}
