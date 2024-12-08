@@ -2,7 +2,6 @@
 
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-
 struct Object
 {
 	vec3 pos;
@@ -18,12 +17,12 @@ struct Object
 	int type;
 };
 
-readonly restrict layout(std430, binding = 0) buffer readBuffer
+readonly layout(std430, binding = 0) buffer readBuffer
 {
 	Object readBodies[];
 };
 
-restrict layout(std430, binding = 1) buffer writeBuffer
+layout(std430, binding = 1) buffer writeBuffer
 {
 	Object writeBodies[];
 };
@@ -45,22 +44,13 @@ vec3 calculateMaximumPoint(inout Object o)
 void main()
 {
 
-	// Number of invocations per work group
-	// Total invocations per work group (since it's 1D, it's just local_size_x)
-	uint invocationsPerGroup = gl_WorkGroupSize.x;
+	// numarul total de tread-uri la nivel de workgroup
+	uint noThreads = gl_WorkGroupSize.x;
 
-	// Simplified global index using only the X component
-	uint globalIndex = gl_WorkGroupID.x * invocationsPerGroup + gl_LocalInvocationID.x;
-
-
-	uint i = globalIndex;
+	// index unic global pentru fiecare thread in parte
+	uint threadGlobalIndex = gl_WorkGroupID.x * noThreads + gl_LocalInvocationID.x;
+	uint i = threadGlobalIndex;
 	writeBodies[i] = readBodies[i];
-
-	//writeBodies[i].pos -= vec3(0, 1 * deltaTime, 0);
-
-	//the first for dissapears, we assign a thread for each iteration of it
-	//for (int i = 0; i < objectsCount; i++)
-	{
 
 		// forta de frecare cu aerul
 		float dragCoefficient = 0.2f;
@@ -81,7 +71,7 @@ void main()
 			}
 			
 
-			// sphere - sphere collision
+			// coliziunea sfera - sfera
 			if (writeBodies[i].type == 0 && writeBodies[j].type == 0)
 			{
 				// razele celor 2 sfere
@@ -108,7 +98,7 @@ void main()
 				}
 
 			}
-			// cube - cube collision
+			// coliziunea cub - cub
 			else if (writeBodies[i].type == 1 && writeBodies[j].type == 1)
 			{
 
@@ -166,7 +156,7 @@ void main()
 
 			}
 
-			// cube - sphere collision
+			// coliziunea cub - sfera
 			else if (writeBodies[i].type == 1 && writeBodies[j].type == 0)
 			{
 				float r = writeBodies[j].size.x / 2;
@@ -212,7 +202,7 @@ void main()
 				}
 
 			}
-			// cylinder - cylinder collision
+			// coliziunea cilindru - cilindru
 			else if (writeBodies[i].type == 2 && writeBodies[j].type == 2)
 			{
 				float r1 = writeBodies[i].size.x / 2;
@@ -254,7 +244,7 @@ void main()
 				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
 				//writeBodies[j].velocity = reflect(writeBodies[j].velocity, -normal);
 			}
-			// cylinder - sphere collision
+			// coliziunea cilindru - sfera
 			else if (writeBodies[i].type == 2 && writeBodies[j].type == 0)
 			{
 				float cylinderRadius = writeBodies[i].size.x / 2;
@@ -309,7 +299,7 @@ void main()
 				writeBodies[i].velocity = reflect(writeBodies[i].velocity, normal);
 
 			}
-			// cylinder - cube collision
+			// coliziunea cilindru - cub
 			else if (writeBodies[i].type == 2 && writeBodies[j].type == 1)
 			{
 				float cylinderRadius = writeBodies[i].size.x / 2;
@@ -389,6 +379,7 @@ void main()
 		vec3 minPos = calculateMinimumPoint(writeBodies[i]);
 		vec3 maxPos = calculateMaximumPoint(writeBodies[i]);
 
+		// coliziunea cu peretii containerului de sticla
 		if (minPos.y < 0)
 		{
 			writeBodies[i].pos.y += -minPos.y;
@@ -425,6 +416,6 @@ void main()
 			writeBodies[i].velocity.z *= -1;
 		}
 
-	}
+	
 
 }

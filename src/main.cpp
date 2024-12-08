@@ -11,14 +11,6 @@
 #include <physics.h>
 
 
-//enable GPU
-extern "C"
-{
-	__declspec(dllexport) unsigned long NvOptimusEnablement = 1;
-	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-}
-
-
 PhysicsSimulator engine;
 
 int currentShaderReadsBuffer = 0; 
@@ -26,6 +18,7 @@ unsigned int buffers[2];
 bool simulateOnCPU = false;
 
 void createGPUBuffers() {
+
 	buffers[0] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
 	buffers[1] = rlLoadShaderBuffer(engine.objects.size() * sizeof(engine.objects[0]), engine.objects.data(), RL_DYNAMIC_COPY);
 }
@@ -52,32 +45,6 @@ void readBuffers() {
 
 int main(void)
 {
-
-
-	for (int i = 0; i < 0; i++)
-	{
-
-	   engine.addSphere({ rand() % ((int)engine.glassContainer.x - 5) - 7, rand() % ((int)engine.glassContainer.y - 10) + 5,
-				rand() % ((int)engine.glassContainer.z - 5) + 5 }, (rand() % 3 + 1) / 3.f);
-
-
-
-		engine.addCube({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2
-				},
-				{ (rand() % 3 + 1) ,(rand() % 3 + 1) ,(rand() % 3 + 1) });
-
-
-		engine.addCylindre({ rand() % ((int)engine.glassContainer.x) - engine.glassContainer.x / 2, rand() % ((int)engine.glassContainer.y) - engine.glassContainer.y / 2, rand() % ((int)engine.glassContainer.z) - engine.glassContainer.z / 2 },
-			(rand() % 2 + 1) / 3.f, (rand() % 3 + 2) / 3.f);
-
-	}
-
-		//engine.addCube({ 2, 2, 1 }, { 2,2,2 });
-		//engine.addCylindre({ 3, 10, 2 }, 2, 3);
-		//engine.addCube({ 4, 16, 3 }, { 2,2,2 });
-	
-
-
 	engine.addSphere({ 1, 3, 0 }, 1);
 	engine.addSphere({ 0, 6, 0 }, 1);
 	engine.addSphere({ 3, 25, 4 }, 1);
@@ -102,8 +69,6 @@ int main(void)
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(800, 600, "The Sims | Physics simulator");
 
-
-	
 	unsigned int computeShader = 0;
 	{
 		char* code = LoadFileText(RESOURCES_PATH "compute.glsl");
@@ -162,7 +127,6 @@ int main(void)
 	while (!WindowShouldClose())
 	{
 
-#pragma region compute
 		if (!simulateOnCPU) {
 			{
 				rlEnableShader(computeShader);
@@ -179,9 +143,6 @@ int main(void)
 				rlDisableShader();
 			}
 		}
-#pragma endregion
-
-
 
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
