@@ -13,7 +13,7 @@
 
 PhysicsSimulator engine;
 
-int currentShaderReadsBuffer = 0; 
+int currentBuffer = 0; 
 unsigned int buffers[2];
 bool simulateOnCPU = false;
 
@@ -34,13 +34,13 @@ void updateBuffers() {
 
 void readBuffers() {
 
-	if (currentShaderReadsBuffer)
+	if (currentBuffer)
 	{
-		rlReadShaderBuffer(buffers[!currentShaderReadsBuffer], engine.objects.data(),
+		rlReadShaderBuffer(buffers[!currentBuffer], engine.objects.data(),
 			engine.objects.size() * sizeof(engine.objects[0]), 0);
 	};
 
-	currentShaderReadsBuffer = !currentShaderReadsBuffer;
+	currentBuffer = !currentBuffer;
 }
 
 int main(void)
@@ -130,8 +130,8 @@ int main(void)
 		if (!simulateOnCPU) {
 			{
 				rlEnableShader(computeShader);
-				rlBindShaderBuffer(buffers[currentShaderReadsBuffer], 0);
-				rlBindShaderBuffer(buffers[!currentShaderReadsBuffer], 1);
+				rlBindShaderBuffer(buffers[currentBuffer], 0);
+				rlBindShaderBuffer(buffers[!currentBuffer], 1);
 
 				int count = engine.objects.size();
 				float dt = GetFrameTime();
