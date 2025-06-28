@@ -4,7 +4,14 @@ A real time physics simulator by using raylib library and compute shaders
 ## Showcase
 ![Engine Screenshot](resources/showcase.PNG)
 
-## Scenarios - _fully parallelized operations on the GPU via compute shaders_
+## Collision detections & collision responses - _fully parallelized on the GPU via compute shaders_
+- [x] Cube - cube
+- [x] Cube - sphere
+- [x] Cube - cylinder
+- [x] Sphere - sphere
+- [x] Sphere - cylinder
+- [x] Cylinder - cylinder
+## Scenarios 
 
 ### Lightweight test scenario - **60 FPS**
 
