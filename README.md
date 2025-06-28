@@ -4,8 +4,9 @@ A real time physics simulator by using raylib library and compute shaders
 ## Showcase
 ![Engine Screenshot](resources/showcase.PNG)
 
-## Scenarios - _fully running on the GPU_
-1. Lightweight scenario - **60 FPS**
+## Scenarios - _fully parallelized operations on the GPU via compute shaders_
+
+### Lightweight test scenario - **60 FPS**
 
     * 100 spheres
 
@@ -13,7 +14,7 @@ A real time physics simulator by using raylib library and compute shaders
 
     * 500 cylinders/cones
 
-2. Medium scenario - **60 FPS**
+### Medium test scenario - **60 FPS**
 
     * 250 spheres
 
@@ -21,7 +22,7 @@ A real time physics simulator by using raylib library and compute shaders
 
     * 1000 cylinders/cones
 
-3. Heavyweight scenario - **40 FPS**
+### Heavyweight test scenario - **40 FPS**
 
     * 500 spheres
 
